@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property Command Center — Rough Draft v5</title>
+<title>Property Command Center — Rough Draft v6</title>
 <style>
   :root, :root[data-theme="A"]{
     --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
@@ -97,7 +97,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v5 — organized: tabs up front, everything indexed</div>
+      <div class="sub">Rough draft v6 — checklist upgraded: notes, photo/video/file uploads, add & remove items</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -172,7 +172,11 @@
             <div style="background:var(--bg);border-radius:999px;height:10px;overflow:hidden"><div id="ckBar" style="height:100%;width:0%;background:var(--teal);transition:width .3s"></div></div>
             <div class="note" id="ckPct" style="margin:6px 0 4px">0% checked</div>
             <div id="ckList"></div>
-            <p class="note">Room-by-room check-off that pairs with the before photos.</p>
+            <form onsubmit="addCkItem(event)" style="margin-top:12px">
+              <input id="ckNewItem" placeholder="New checklist item — e.g. Garage door opener (sample)">
+              <button class="addbtn" type="submit">＋ Add item to this checklist</button>
+            </form>
+            <p class="note">Room-by-room check-off that pairs with the before photos. Every item takes its own <b>notes</b> and <b>photos / videos / files</b>, and items can be added or removed right here in the app. In this draft, uploads stay in this session's view — the deployed app stores them with the property.</p>
           </div>
         </div>
 
@@ -368,7 +372,7 @@
     </div>
   </div>
 
-  <footer>ROUGH DRAFT v5 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+  <footer>ROUGH DRAFT v6 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
 </div>
 
 <!-- bottom dock -->
@@ -613,19 +617,68 @@ function renderPeople(){
     <div class="person"><div class="avatar">${p[0]}</div><div>${p[2]}<small>${p[1]} · ${p[3]}<br><span class="chip" style="font-size:11px">${i===0?'Regular · Insurance cert on file — renews Mar 2027 (sample)':'Regular (sample)'}</span></small></div><a class="call" href="tel:${p[3].replace(/[^0-9]/g,'')}">Call</a></div>`).join('');
 }
 function addPerson(e){ e.preventDefault(); const r=document.getElementById('pRole').value.trim(), n=document.getElementById('pName').value.trim(), ph=document.getElementById('pPhone').value.trim()||'—'; if(!r||!n) return; current.people.push(['👤',r,n,ph]); renderPeople(); e.target.reset(); }
-/* checklist */
-const CK_ITEMS = ["Living room — walls & floors","Kitchen — appliances tested","Kitchen — counters & cabinets","Main bedroom","Bathrooms — plumbing & fixtures","Windows & doors lock","AC / heat runs","Water heater checked","Keys handed over & counted","Meter readings recorded","Photos taken of every room"];
-let ckState = {}, ckMode = 'in';
-function renderCk(){
+/* checklist — per-item notes + uploads (images/videos/files), add/remove items in-app (Bori, Oct 14) */
+const CK_DEFAULTS = ["Living room — walls & floors","Kitchen — appliances tested","Kitchen — counters & cabinets","Main bedroom","Bathrooms — plumbing & fixtures","Windows & doors lock","AC / heat runs","Water heater checked","Keys handed over & counted","Meter readings recorded","Photos taken of every room"];
+let ckItemsStore = {}, ckState = {}, ckMode = 'in', ckOpen = {};
+let ckSeq = 0;
+function ckItems(){
+  if(!ckItemsStore[current.id]) ckItemsStore[current.id] = CK_DEFAULTS.map(label => ({id:'ck'+(++ckSeq), label}));
+  return ckItemsStore[current.id];
+}
+function ckEntry(itemId){
   const key = current.id + '-' + ckMode;
-  if(!ckState[key]) ckState[key] = CK_ITEMS.map(()=>false);
-  const st = ckState[key];
-  document.getElementById('ckList').innerHTML = st.map((v,i)=>`<label class="asset" style="cursor:pointer"><span>${CK_ITEMS[i]}</span><input type="checkbox" ${v?'checked':''} onchange="toggleCk(${i})" style="width:22px;height:22px;accent-color:var(--teal)"></label>`).join('');
-  const pct = Math.round(st.filter(Boolean).length / st.length * 100);
+  if(!ckState[key]) ckState[key] = {};
+  if(!ckState[key][itemId]) ckState[key][itemId] = {checked:false, notes:'', atts:[]};
+  return ckState[key][itemId];
+}
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderCk(){
+  const items = ckItems();
+  document.getElementById('ckList').innerHTML = items.length ? items.map(it=>{
+    const e = ckEntry(it.id), open = !!ckOpen[it.id];
+    const meta = [e.notes ? '📝 note saved' : '', e.atts.length ? '📎 ' + e.atts.length + ' file' + (e.atts.length>1?'s':'') : ''].filter(Boolean).join(' · ');
+    const attHtml = e.atts.map((a,ai)=>{
+      if(a.kind==='image') return `<div style="position:relative;width:76px;height:76px"><img src="${a.url}" style="width:76px;height:76px;object-fit:cover;border-radius:10px"><button type="button" onclick="removeCkAtt('${it.id}',${ai})" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--red);color:#fff;font-weight:800;cursor:pointer">×</button></div>`;
+      if(a.kind==='video') return `<div style="position:relative;width:120px"><video src="${a.url}" controls style="width:120px;border-radius:10px"></video><button type="button" onclick="removeCkAtt('${it.id}',${ai})" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--red);color:#fff;font-weight:800;cursor:pointer">×</button></div>`;
+      return `<span class="chip" style="max-width:100%">📄 ${escHtml(a.name)} <button type="button" onclick="removeCkAtt('${it.id}',${ai})" style="border:none;background:none;color:var(--red);font-weight:800;cursor:pointer">×</button></span>`;
+    }).join('');
+    return `<div class="asset" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" ${e.checked?'checked':''} onchange="toggleCk('${it.id}')" style="width:22px;height:22px;accent-color:var(--teal);flex:none">
+        <span style="flex:1">${escHtml(it.label)}${meta?`<small>${meta}</small>`:''}</span>
+        <button type="button" class="chip" style="cursor:pointer" onclick="toggleCkEditor('${it.id}')">${open?'Done':'📝＋📎 Note / files'}</button>
+        <button type="button" title="Remove item" onclick="removeCkItem('${it.id}')" style="border:none;background:none;color:var(--red);font-size:16px;font-weight:800;cursor:pointer;padding:2px 6px">✕</button>
+      </div>
+      ${open?`<div style="margin-top:10px">
+        <textarea id="cknote-${it.id}" rows="2" placeholder="Note for this item — condition, serial #, anything (sample)" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px;font-family:inherit;font-size:14px;box-sizing:border-box" onchange="saveCkNote('${it.id}')">${escHtml(e.notes)}</textarea>
+        <label class="addbtn" style="display:block;text-align:center;cursor:pointer;margin-top:8px">📎 Add photo / video / file<input type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt" style="display:none" onchange="addCkFiles('${it.id}', this)"></label>
+        ${e.atts.length?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${attHtml}</div>`:''}
+      </div>`:''}
+    </div>`;
+  }).join('') : '<p class="note">No items in this checklist yet — add the first one below.</p>';
+  const done = items.filter(it=>ckEntry(it.id).checked).length;
+  const pct = items.length ? Math.round(done / items.length * 100) : 0;
   document.getElementById('ckBar').style.width = pct + '%';
   document.getElementById('ckPct').textContent = pct + '% checked — ' + (ckMode==='in'?'Move-In':'Move-Out') + ' walkthrough';
 }
-function toggleCk(i){ const key=current.id+'-'+ckMode; ckState[key][i]=!ckState[key][i]; renderCk(); }
+function toggleCk(id){ const e=ckEntry(id); e.checked=!e.checked; renderCk(); }
+function toggleCkEditor(id){ ckOpen[id]=!ckOpen[id]; renderCk(); }
+function saveCkNote(id){ const t=document.getElementById('cknote-'+id); if(t) ckEntry(id).notes = t.value; renderCk(); }
+function addCkFiles(id, input){
+  const e = ckEntry(id);
+  Array.from(input.files||[]).forEach(f=>{
+    const kind = f.type.indexOf('image')===0 ? 'image' : (f.type.indexOf('video')===0 ? 'video' : 'file');
+    e.atts.push({name:f.name, kind:kind, url: URL.createObjectURL(f)});
+  });
+  ckOpen[id]=true; renderCk();
+}
+function removeCkAtt(id, idx){ ckEntry(id).atts.splice(idx,1); renderCk(); }
+function addCkItem(ev){ ev.preventDefault(); const inp=document.getElementById('ckNewItem'); const v=inp.value.trim(); if(!v) return; ckItems().push({id:'ck'+(++ckSeq), label:v}); ev.target.reset(); renderCk(); }
+function removeCkItem(id){
+  ckItemsStore[current.id] = ckItems().filter(it=>it.id!==id);
+  ['in','out'].forEach(m=>{ const k=current.id+'-'+m; if(ckState[k]) delete ckState[k][id]; });
+  delete ckOpen[id]; renderCk();
+}
 function setCkMode(m){ ckMode=m; document.getElementById('ckIn').classList.toggle('on',m==='in'); document.getElementById('ckOut').classList.toggle('on',m==='out'); renderCk(); }
 /* ================= CALENDAR ================= */
 let calEvents = {1:["Rent due — all locations (sample)"],5:["HOA due — 780 Demo Grove (sample)"],15:["Loan payments — all locations (sample)"],20:["Insurance renewal review (sample)"],31:["Lease check: 101 Sample Palms (sample)"]};
