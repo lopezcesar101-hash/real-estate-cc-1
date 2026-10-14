@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property Command Center — Rough Draft v7</title>
+<title>Property Command Center — Rough Draft v8</title>
 <style>
   :root, :root[data-theme="A"]{
     --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
@@ -103,7 +103,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v7 — checklist upgraded + unoccupied locations stand out</div>
+      <div class="sub">Rough draft v8 — tenant background check section, on/off by the administrator</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -192,6 +192,7 @@
           <div class="index">
             <button onclick="jump('sec-renter')">👤 Renter</button>
             <button onclick="jump('sec-lease')">📄 Lease</button>
+            <button onclick="jump('sec-background')">🔍 Background Check</button>
             <button onclick="jump('sec-people')">🔧 Service People</button>
           </div>
           <div class="section" id="sec-renter">
@@ -204,6 +205,13 @@
             <h3>📄 Lease</h3>
             <div id="leaseRows"></div>
             <p class="note">The lease for this property, stored here with its dates and deposit.</p>
+          </div>
+          <div class="section" id="sec-background">
+            <h3>🔍 Tenant Background Check</h3>
+            <div id="bgRows"></div>
+            <div id="bgList" style="margin-top:6px"></div>
+            <label class="addbtn" style="display:block;text-align:center;cursor:pointer;margin-top:10px">📎 Upload background check<input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" style="display:none" onchange="addBgFiles(this)"></label>
+            <p class="note">For this location's tenant — only if a background check was required and performed. This whole section can be turned off (or back on) any time in <b>More → Customize</b> — the administrator decides. In this draft, uploads stay in this session's view; the deployed app stores them securely with the location.</p>
           </div>
           <div class="section" id="sec-people">
             <h3>🔧 Service People</h3>
@@ -379,7 +387,7 @@
     </div>
   </div>
 
-  <footer>ROUGH DRAFT v7 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+  <footer>ROUGH DRAFT v8 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
 </div>
 
 <!-- bottom dock -->
@@ -530,7 +538,7 @@ function openProp(id){
   document.getElementById('renterRows').innerHTML = current.vacant
     ? kvRows([['Status','No tenant — this location is vacant'],['Asking rent', current.asking],['Next step','List it / schedule tours (sample)']])
     : kvRows([['Tenant name',current.renter.name],['Phone',current.renter.phone],['Email',current.renter.email],['Occupants',current.renter.occupants]]);
-  renderCrm(); renderLease(); renderRent(); renderLoanEquity(); renderBills(); renderDocs(); renderAssets(); renderRepairs(); renderPhotos(); renderPeople(); renderCk(); updateSticky();
+  renderCrm(); renderLease(); renderBg(); renderRent(); renderLoanEquity(); renderBills(); renderDocs(); renderAssets(); renderRepairs(); renderPhotos(); renderPeople(); renderCk(); updateSticky();
   document.querySelectorAll('.gtabs button').forEach(b=>b.classList.toggle('on', b.dataset.group==='overview'));
   document.querySelectorAll('[data-gpane]').forEach(p=>p.classList.toggle('hidden', p.dataset.gpane!=='overview'));
   applyPrefs();
@@ -573,6 +581,28 @@ function renderLease(){
     ? kvRows([['Lease document','— none (vacant)'],['Status','No active lease']])
     : kvRows([['Lease document','📄 Signed Lease Agreement — stored in Documents'],['Tenant',current.renter.name],['Lease term',current.renter.lease],['Monthly rent',current.renter.rent],['Security deposit held','$2,400 (sample)'],['Heads-up','⚠️ Review renewal 60 days before end date (sample)']]);
 }
+/* --- Tenant background check (per location, toggleable section) --- */
+let bgStore = {};
+function bgFiles(){
+  if(!bgStore[current.id]) bgStore[current.id] = current.vacant ? [] : [{name:'Background Check Report — ' + current.renter.name + ' (PDF)', sample:true}];
+  return bgStore[current.id];
+}
+function renderBg(){
+  document.getElementById('bgRows').innerHTML = current.vacant
+    ? kvRows([['Required','Set by the administrator (sample)'],['Performed','— no tenant yet'],['Where it lives','Applicant checks upload right here as prospects apply (sample)']])
+    : kvRows([['Tenant',current.renter.name],['Required','Yes (sample)'],['Performed','Yes — Aug 12, 2026 (sample)'],['Result','Passed screening (sample)'],['Screening provider','Sample Screening Co. (sample)'],['Consent on file','Yes (sample)']]);
+  const files = bgFiles();
+  document.getElementById('bgList').innerHTML = files.length ? files.map((f,i)=>`
+    <div class="asset"><span>${f.kind==='image' ? `<img src="${f.url}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:8px">` : '📄 '}${escHtml(f.name)}<small>${f.sample ? 'Stored with this location (sample document)' : 'Uploaded just now (this session)'}</small></span>${f.sample ? '<span class="chip"><b>On file</b></span>' : `<button type="button" onclick="removeBg(${i})" style="border:none;background:none;color:var(--red);font-weight:800;cursor:pointer">Remove</button>`}</div>`).join('')
+    : '<p class="note">No background check uploaded for this location yet.</p>';
+}
+function addBgFiles(input){
+  Array.from(input.files||[]).forEach(f=>{
+    bgFiles().push({name:f.name, kind:(f.type.indexOf('image')===0?'image':'file'), url: URL.createObjectURL(f)});
+  });
+  renderBg();
+}
+function removeBg(i){ bgFiles().splice(i,1); renderBg(); }
 /* --- Money group --- */
 function renderRent(){
   if(current.vacant){
@@ -716,7 +746,7 @@ function renderTax(){
 /* ================= PILLARS: customize + accuracy ================= */
 const PREF_DEFS = [
   ['mod-attention','Needs Attention (Overview)'], ['mod-money','Money Dashboard'], ['mod-tax','Year-End Tax Summary'], ['mod-calendar','Calendar'],
-  ['sec-lease','Lease section'], ['sec-rent','Rent Tracker'], ['sec-bills','Bills section'], ['sec-docs','Documents section'], ['sec-checklist','Move In/Out Checklist'], ['sec-people','Service People section'],
+  ['sec-lease','Lease section'], ['sec-background','Tenant Background Check section'], ['sec-rent','Rent Tracker'], ['sec-bills','Bills section'], ['sec-docs','Documents section'], ['sec-checklist','Move In/Out Checklist'], ['sec-people','Service People section'],
 ];
 let prefs = {};
 try { prefs = JSON.parse(localStorage.getItem('recc_prefs')||'{}'); } catch(e){ prefs = {}; }
