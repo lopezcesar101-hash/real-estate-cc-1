@@ -75,7 +75,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v2 — owner side, built from Bori's ideas + his Oct 14 verdicts</div>
+      <div class="sub">Rough draft v3 — built on Bori's two pillars: your view, your call · accuracy, double-checked</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -96,20 +96,31 @@
       </div>
 
       <div class="section" style="margin-top:0">
+        <h3 style="margin:0 0 4px">⚙️ Customize My View — Pillar 1</h3>
+        <p class="note" style="margin:0 0 8px">Built the way the owner wants it — and anything here can be dropped just as easily. Flip a switch: that module disappears. Flip it back: it's back. Easy to manage, nothing forced.</p>
+        <div style="font-weight:800;font-size:13px;margin-top:8px">Home sections</div>
+        <div id="prefHome"></div>
+        <div style="font-weight:800;font-size:13px;margin-top:10px">Inside each property (tabs)</div>
+        <div id="prefTabs"></div>
+      </div>
+
+      <div class="section" id="mod-money">
         <h3 style="margin:0 0 8px">💵 Money Dashboard — whole portfolio</h3>
-        <div class="row"><span><small>Rent coming in</small></span><b style="color:var(--teal)">$9,000 / mo</b></div>
+        <div class="row"><span><small>Rent coming in</small></span><b style="color:var(--teal)" id="mdRent">$9,000 / mo</b></div>
         <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:100%;height:100%;background:var(--teal);border-radius:6px"></div></div>
-        <div class="row"><span><small>Loan payments + property bills</small></span><b style="color:var(--red)">$7,038 / mo</b></div>
-        <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:78%;height:100%;background:var(--red);border-radius:6px"></div></div>
-        <div class="total"><span>Net (sample)</span><span>$1,962 / mo</span></div>
+        <div class="row"><span><small>Loan payments + property bills</small></span><b style="color:var(--red)" id="mdCosts">$7,250 / mo</b></div>
+        <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:81%;height:100%;background:var(--red);border-radius:6px"></div></div>
+        <div class="total"><span>Net (sample)</span><span id="mdNet">$1,750 / mo</span></div>
+        <div id="dataCheck" style="margin-top:10px;font-size:13px;font-weight:700"></div>
         <p class="note">Sample math from the 4 fake properties below — the shape of the dashboard, not real money.</p>
+        <p class="note" style="border-top:1px solid var(--line);padding-top:10px"><b>🛡️ Accuracy Protocol — Pillar 2:</b> automated data is double-checked before it's displayed, and any contradiction gets <b>flagged before you see it</b> — never passed along silently. Data you type in yourself is confirmed by you; the protocol covers the automated numbers.</p>
       </div>
 
       <h2>My Properties — one at a time</h2>
       <div id="propList"></div>
       <p class="note">Tap a property to open everything for that one property: renter, property details, its loan, its asset checkup list, its condition photos, and its service people.</p>
 
-      <div class="section">
+      <div class="section" id="mod-calendar">
         <h3 style="margin:0 0 4px">📅 Calendar — October 2026 (sample)</h3>
         <div class="note" style="margin:0 0 10px">Tap a day to see what's due. Add your own reminder below. <b>The plan:</b> when the app is deployed, this calendar connects to your actual email and Google Calendar — interactive mock until then (Bori's plan).</div>
         <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"></div>
@@ -121,7 +132,7 @@
         </form>
       </div>
 
-      <div class="section">
+      <div class="section" id="mod-tax">
         <h3 style="margin:0 0 8px">🧾 Year-End Tax Summary — 2026 (sample)</h3>
         <div id="taxRows"></div>
         <div class="total"><span>Net for the year (sample)</span><span id="taxNet">$0</span></div>
@@ -532,6 +543,55 @@ openProp = function(id){
   _openProp(id);
   renderKeys(); renderLease(); renderRent(); renderEquity(); renderBills(); renderDocs(); renderRepairs(); renderCk();
 };
+/* ===== THE TWO PILLARS (Bori, Oct 14) ===== */
+/* Pillar 1 — Customize: any module can be dropped as easily as it was added */
+const PREF_DEFS = [
+  ['money','Money Dashboard','home'], ['calendar','Calendar','home'], ['tax','Year-End Tax Summary','home'],
+  ['tab_renter','Renter tab','tab'], ['tab_lease','Lease tab','tab'], ['tab_rent','Rent Tracker tab','tab'],
+  ['tab_loan','Loan tab','tab'], ['tab_bills','Bills tab','tab'], ['tab_docs','Documents tab','tab'],
+  ['tab_photos','Photos tab','tab'], ['tab_checklist','Move In / Out tab','tab'], ['tab_people','Service People tab','tab'],
+];
+let prefs = {};
+try { prefs = JSON.parse(localStorage.getItem('recc_prefs')||'{}'); } catch(e){ prefs = {}; }
+PREF_DEFS.forEach(([k])=>{ if(prefs[k]===undefined) prefs[k]=true; });
+function savePrefs(){ try { localStorage.setItem('recc_prefs', JSON.stringify(prefs)); } catch(e){} }
+function renderPrefs(){
+  const mk = ([k,label])=>`<label class="asset" style="cursor:pointer"><span>${label}</span><input type="checkbox" ${prefs[k]?'checked':''} onchange="togglePref('${k}')" style="width:22px;height:22px;accent-color:var(--gold)"></label>`;
+  document.getElementById('prefHome').innerHTML = PREF_DEFS.filter(d=>d[2]==='home').map(mk).join('');
+  document.getElementById('prefTabs').innerHTML = PREF_DEFS.filter(d=>d[2]==='tab').map(mk).join('');
+}
+function tabName(key){ return key.replace('tab_',''); }
+function applyPrefs(){
+  const map = {money:'mod-money', calendar:'mod-calendar', tax:'mod-tax'};
+  Object.entries(map).forEach(([k,id])=>{ const el=document.getElementById(id); if(el) el.style.display = prefs[k] ? '' : 'none'; });
+  document.querySelectorAll('.tabs button').forEach(b=>{
+    const k = 'tab_' + b.dataset.tab;
+    if(prefs[k]===false) b.style.display='none'; else if(prefs[k]!==undefined) b.style.display='';
+  });
+  const activeBtn = document.querySelector('.tabs button.on');
+  if(activeBtn && activeBtn.style.display==='none'){
+    const propBtn = document.querySelector('.tabs button[data-tab="property"]'); if(propBtn) setTab(propBtn);
+  }
+}
+function togglePref(k){ prefs[k]=!prefs[k]; savePrefs(); applyPrefs(); }
+/* Pillar 2 — Accuracy protocol: automated figures are re-added from their parts and must reconcile before they earn a "checked" mark; a mismatch is FLAGGED, not hidden */
+function parseMoneyStr(s){ const m = String(s).replace(/,/g,'').match(/[\d.]+/); return m ? Number(m[0]) : 0; }
+function runDataCheck(){
+  const rent = PROPERTIES.reduce((s,p)=>s+parseMoneyStr(p.renter.rent),0);
+  const loans = PROPERTIES.reduce((s,p)=>s+parseMoneyStr(p.loan.payment),0);
+  const bills = PROPERTIES.reduce((s,p)=>s+EXTRA[p.id].bills.reduce((a,b)=>a+Number(b[1]),0),0);
+  const costs = loans + bills, net = rent - costs;
+  const shownRent = parseMoneyStr(document.getElementById('mdRent').textContent);
+  const shownCosts = parseMoneyStr(document.getElementById('mdCosts').textContent);
+  const shownNet = parseMoneyStr(document.getElementById('mdNet').textContent);
+  const el = document.getElementById('dataCheck');
+  if(rent===shownRent && costs===shownCosts && net===shownNet){
+    el.innerHTML = '✅ <span style="color:var(--teal)">Data check passed</span> <span style="color:var(--muted);font-weight:400">— automated figures re-added from their parts and they reconcile (' + money(rent) + ' in − ' + money(costs) + ' out = ' + money(net) + ' net).</span>';
+  } else {
+    el.innerHTML = '⚠️ <span style="color:var(--red)">CONTRADICTION FLAGGED</span> <span style="color:var(--muted);font-weight:400">— the displayed totals do not match their parts (recomputed: ' + money(rent) + ' in − ' + money(costs) + ' out = ' + money(net) + ' net). Flagged before display, per the accuracy protocol — review before trusting these numbers.</span>';
+  }
+}
+renderPrefs(); applyPrefs(); runDataCheck();
 renderCal(); renderTax();
 renderList();
 </script>
