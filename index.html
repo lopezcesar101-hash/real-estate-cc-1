@@ -92,11 +92,41 @@
       <div class="stats">
         <div class="stat"><b id="statCount">4</b><small>Properties</small></div>
         <div class="stat"><b>4</b><small>Occupied (sample)</small></div>
-        <div class="stat"><b>$—</b><small>Portfolio loan view later</small></div>
+        <div class="stat"><b>$9,000</b><small>Rent in / mo (sample)</small></div>
       </div>
+
+      <div class="section" style="margin-top:0">
+        <h3 style="margin:0 0 8px">💵 Money Dashboard — whole portfolio</h3>
+        <div class="row"><span><small>Rent coming in</small></span><b style="color:var(--teal)">$9,000 / mo</b></div>
+        <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:100%;height:100%;background:var(--teal);border-radius:6px"></div></div>
+        <div class="row"><span><small>Loan payments + property bills</small></span><b style="color:var(--red)">$7,038 / mo</b></div>
+        <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:78%;height:100%;background:var(--red);border-radius:6px"></div></div>
+        <div class="total"><span>Net (sample)</span><span>$1,962 / mo</span></div>
+        <p class="note">Sample math from the 4 fake properties below — the shape of the dashboard, not real money.</p>
+      </div>
+
       <h2>My Properties — one at a time</h2>
       <div id="propList"></div>
       <p class="note">Tap a property to open everything for that one property: renter, property details, its loan, its asset checkup list, its condition photos, and its service people.</p>
+
+      <div class="section">
+        <h3 style="margin:0 0 4px">📅 Calendar — October 2026 (sample)</h3>
+        <div class="note" style="margin:0 0 10px">Tap a day to see what's due. Add your own reminder below. <b>The plan:</b> when the app is deployed, this calendar connects to your actual email and Google Calendar — interactive mock until then (Bori's plan).</div>
+        <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"></div>
+        <div id="calEvents" style="margin-top:10px"></div>
+        <form onsubmit="addEvent(event)">
+          <input id="eDay" type="number" min="1" max="31" placeholder="Day of month — e.g. 20" required>
+          <input id="eTitle" placeholder="Reminder — e.g. Lease ends: 101 Sample Palms" required>
+          <button class="addbtn" type="submit">+ Add reminder</button>
+        </form>
+      </div>
+
+      <div class="section">
+        <h3 style="margin:0 0 8px">🧾 Year-End Tax Summary — 2026 (sample)</h3>
+        <div id="taxRows"></div>
+        <div class="total"><span>Net for the year (sample)</span><span id="taxNet">$0</span></div>
+        <p class="note">Income vs expenses per property for the year, ready to hand to an accountant. Sample figures only — not a tax filing.</p>
+      </div>
     </div>
 
     <!-- Single property detail -->
@@ -109,14 +139,22 @@
       <div class="tabs">
         <button class="on" data-tab="property" onclick="setTab(this)">Property</button>
         <button data-tab="renter" onclick="setTab(this)">Renter</button>
+        <button data-tab="lease" onclick="setTab(this)">Lease</button>
+        <button data-tab="rent" onclick="setTab(this)">Rent Tracker</button>
         <button data-tab="loan" onclick="setTab(this)">Loan</button>
+        <button data-tab="bills" onclick="setTab(this)">Bills</button>
+        <button data-tab="docs" onclick="setTab(this)">Documents</button>
         <button data-tab="assets" onclick="setTab(this)">Asset Checkup</button>
         <button data-tab="photos" onclick="setTab(this)">Photos</button>
+        <button data-tab="checklist" onclick="setTab(this)">Move In / Out</button>
         <button data-tab="people" onclick="setTab(this)">Service People</button>
       </div>
 
       <div class="section" data-pane="property">
         <div id="propertyRows"></div>
+        <h3 style="margin:16px 0 4px">🔑 Keys &amp; Access — owner only</h3>
+        <div id="keysRows"></div>
+        <p class="note">Keys &amp; access lives inside the property details, per Bori's placement.</p>
       </div>
 
       <div class="section hidden" data-pane="renter">
@@ -124,9 +162,60 @@
         <p class="note">All renter details for this property, at hand in one place. (Sample person — fake info only.)</p>
       </div>
 
+      <div class="section hidden" data-pane="lease">
+        <div id="leaseRows"></div>
+        <p class="note">The lease for this property, stored here with its dates and deposit. Heads-up chip appears when the end date is close. (Sample lease — fake info only.)</p>
+      </div>
+
+      <div class="section hidden" data-pane="rent">
+        <div id="rentNow"></div>
+        <h3 style="margin:14px 0 4px">Payment history</h3>
+        <div id="rentHistory"></div>
+        <p class="note">Rent tracker for this property: due, paid, late — month by month. (Sample history — fake info only.)</p>
+      </div>
+
       <div class="section hidden" data-pane="loan">
         <div id="loanRows"></div>
         <p class="note">A section dedicated just to this property's loan. (Sample loan — fake info only.)</p>
+        <h3 style="margin:16px 0 4px">💰 Equity Tracker</h3>
+        <div id="equityRows"></div>
+        <p class="note">Equity = what it's worth now − loan balance. In the deployed app this pulls <b>real bank and loan data</b> (Bori's plan) — sample numbers until then.</p>
+      </div>
+
+      <div class="section hidden" data-pane="bills">
+        <div id="billList"></div>
+        <div class="total"><span>Total monthly bills</span><span id="billTotal">$0</span></div>
+        <form onsubmit="addBill(event)">
+          <input id="bName" placeholder="Bill — e.g. HOA, Water, Insurance" required>
+          <input id="bAmt" placeholder="Amount — e.g. 145" type="number" min="0" step="0.01" required>
+          <input id="bDue" placeholder="Due — e.g. 15th of month">
+          <button class="addbtn" type="submit">+ Add bill for this property</button>
+        </form>
+      </div>
+
+      <div class="section hidden" data-pane="docs">
+        <input id="docSearch" placeholder="🔎 Search documents — try &quot;insurance&quot; or &quot;lease&quot;" oninput="renderDocs()">
+        <div class="chips" id="docCats" style="margin:10px 0 4px">
+          <button class="chip" style="cursor:pointer" onclick="setDocCat(this,'All')">All</button>
+          <button class="chip" style="cursor:pointer" onclick="setDocCat(this,'Insurance')">Insurance</button>
+          <button class="chip" style="cursor:pointer" onclick="setDocCat(this,'Lease')">Lease</button>
+          <button class="chip" style="cursor:pointer" onclick="setDocCat(this,'Tax')">Tax</button>
+          <button class="chip" style="cursor:pointer" onclick="setDocCat(this,'Loan')">Loan</button>
+          <button class="chip" style="cursor:pointer" onclick="setDocCat(this,'Ownership')">Ownership</button>
+        </div>
+        <div id="docList"></div>
+        <p class="note">Documents vault for this property — organized by category, with search to retrieve anything fast. <b>Insurance lives in this section</b> (Bori's placement).</p>
+      </div>
+
+      <div class="section hidden" data-pane="checklist">
+        <div class="seg" style="margin:0 0 10px">
+          <button id="ckIn" class="on" onclick="setCkMode('in')">Move-In</button>
+          <button id="ckOut" onclick="setCkMode('out')">Move-Out</button>
+        </div>
+        <div style="background:var(--bg);border-radius:999px;height:10px;overflow:hidden"><div id="ckBar" style="height:100%;width:0%;background:var(--teal);transition:width .3s"></div></div>
+        <div class="note" id="ckPct" style="margin:6px 0 4px">0% checked</div>
+        <div id="ckList"></div>
+        <p class="note">Room-by-room check-off that pairs with the before photos — walk it at move-in, walk it again at move-out.</p>
       </div>
 
       <div class="section hidden" data-pane="assets">
@@ -139,6 +228,15 @@
           <button class="addbtn" type="submit">+ Add to checkup list</button>
         </form>
         <p class="note">Every appliance marked down with its brand and monetary value — the checkup list for this property.</p>
+        <h3 style="margin:18px 0 4px">🛠️ Repairs &amp; Maintenance — connected to Assets</h3>
+        <div id="repairList"></div>
+        <form onsubmit="addRepair(event)">
+          <input id="rWhat" placeholder="What was repaired — e.g. AC compressor" required>
+          <input id="rWho" placeholder="Who fixed it — e.g. Cool Sample Air">
+          <input id="rCost" placeholder="Cost — e.g. 450" type="number" min="0" step="1">
+          <button class="addbtn" type="submit">+ Log repair</button>
+        </form>
+        <p class="note">Repairs live connected to the Assets portion (Bori's placement): what broke, who fixed it, what it cost.</p>
       </div>
 
       <div class="section hidden" data-pane="photos">
@@ -285,6 +383,156 @@ function setSide(side){
   document.getElementById('ownerSide').classList.toggle('hidden', side!=='owner');
   document.getElementById('renterSide').classList.toggle('hidden', side!=='renter');
 }
+/* ===== v2 additions (Bori's YES verdicts, Oct 14) ===== */
+const EXTRA = {
+  1:{purchase:342000, valueNow:415000, balanceNum:286000,
+     keys:[["Front door code","4821 (sample)"],["Garage code","9034 (sample)"],["Alarm code","2210 (sample)"],["Lockbox","On front rail — code 7712 (sample)"],["Spare keys","2 sets — owner holds 1 (sample)"]],
+     bills:[["HOA",145,"1st of month"],["Water / Sewer",68,"15th of month"],["Pest control",45,"Quarterly"],["Lawn care",120,"Monthly"]],
+     repairs:[["AC capacitor replaced","Cool Sample Air",285,"Aug 2026 (sample)"],["Kitchen faucet cartridge","Mike's Sample Plumbing",160,"May 2026 (sample)"]],
+     tax:[28800, 9400]},
+  2:{purchase:385000, valueNow:448000, balanceNum:312500,
+     keys:[["Front door code","6110 (sample)"],["Garage code","6111 (sample)"],["Alarm code","— none (sample)"],["Lockbox","Side gate — code 3308 (sample)"],["Spare keys","1 set (sample)"]],
+     bills:[["HOA",210,"1st of month"],["Water / Sewer",74,"15th of month"],["Pool service",180,"Monthly"]],
+     repairs:[["Pool pump seal","Sample Pool Tech",340,"Jul 2026 (sample)"]],
+     tax:[31800, 11200]},
+  3:{purchase:210000, valueNow:265000, balanceNum:142000,
+     keys:[["Unit door code","7789 (sample)"],["Building entry","Fob — 2 issued (sample)"],["Alarm code","— none (sample)"],["Mailbox key","Box 4 (sample)"],["Spare keys","1 set (sample)"]],
+     bills:[["Condo HOA",265,"1st of month"],["Electric (owner acct)",0,"Tenant pays (sample)"]],
+     repairs:[["Washer/dryer combo belt","Demo Appliance Repair",210,"Sep 2026 (sample)"]],
+     tax:[22200, 6800]},
+  4:{purchase:268000, valueNow:329000, balanceNum:198750,
+     keys:[["Front door code","3456 (sample)"],["Side gate","Padlock — code 0917 (sample)"],["Alarm code","5540 (sample)"],["Lockbox","Porch — code 2020 (sample)"],["Spare keys","2 sets (sample)"]],
+     bills:[["Water / Sewer",59,"15th of month"],["Pest control",40,"Quarterly"],["Lawn care",95,"Monthly"]],
+     repairs:[["Water heater flush + anode","Mock Plumbing KW",190,"Jun 2026 (sample)"],["Porch railing repair","Sample Handyman",275,"Apr 2026 (sample)"]],
+     tax:[25200, 8100]},
+};
+function extra(){ return EXTRA[current.id]; }
+const DOC_CATS = ['All'];
+let docCat = 'All';
+function docsFor(p){
+  return [
+    ["Signed Lease Agreement","Lease", p.renter.lease],
+    ["Property Deed","Ownership","Recorded (sample)"],
+    ["Property Insurance Policy — Sample Mutual Ins.","Insurance","Renews Dec 2026 (sample)"],
+    ["Insurance Certificate (proof of insurance)","Insurance","Issued Jan 2026 (sample)"],
+    ["Flood Insurance Policy — Sample Flood Co.","Insurance","Renews Mar 2027 (sample)"],
+    ["Property Tax Document — 2025","Tax","Filed (sample)"],
+    ["Loan Documents — " + p.loan.lender,"Loan", p.loan.started],
+    ["Move-In Inspection Report","Ownership","With before photos (sample)"],
+  ];
+}
+function renderDocs(){
+  const q = (document.getElementById('docSearch').value||'').toLowerCase();
+  const docs = docsFor(current).filter(d => (docCat==='All'||d[1]===docCat) && (d[0]+' '+d[1]+' '+d[2]).toLowerCase().includes(q));
+  document.getElementById('docList').innerHTML = docs.length ? docs.map(d=>`
+    <div class="asset"><span>📄 ${d[0]}<small>${d[2]}</small></span><span class="chip"><b>${d[1]}</b></span></div>`).join('')
+    : '<p class="note">No documents match that search.</p>';
+}
+function setDocCat(btn, cat){ docCat = cat; renderDocs(); }
+function renderBills(){
+  const b = extra().bills;
+  document.getElementById('billList').innerHTML = b.map(x=>`
+    <div class="asset"><span>${x[0]}<small>Due: ${x[2]}</small></span><b>${money(x[1])}${x[1]? ' / mo':''}</b></div>`).join('');
+  document.getElementById('billTotal').textContent = money(b.reduce((s,x)=>s+Number(x[1]),0)) + ' / mo';
+}
+function addBill(e){
+  e.preventDefault();
+  const n=document.getElementById('bName').value.trim(), a=Number(document.getElementById('bAmt').value), d=document.getElementById('bDue').value.trim()||'Monthly';
+  if(!n||isNaN(a)) return;
+  extra().bills.push([n,a,d]); renderBills(); e.target.reset();
+}
+function renderRepairs(){
+  document.getElementById('repairList').innerHTML = extra().repairs.map(r=>`
+    <div class="asset"><span>${r[0]}<small>${r[1]} · ${r[3]}</small></span><b>${money(r[2])}</b></div>`).join('') || '<p class="note">No repairs logged yet.</p>';
+}
+function addRepair(e){
+  e.preventDefault();
+  const w=document.getElementById('rWhat').value.trim(), who=document.getElementById('rWho').value.trim()||'—', c=Number(document.getElementById('rCost').value)||0;
+  if(!w) return;
+  extra().repairs.push([w,who,c,'Oct 2026 (sample)']); renderRepairs(); e.target.reset();
+}
+let rentPaid = {1:false,2:true,3:false,4:true};
+function renderRent(){
+  const months = ['Jul 2026','Aug 2026','Sep 2026'];
+  document.getElementById('rentNow').innerHTML = `
+    <div class="row"><span><small>October 2026 rent</small>${current.renter.rent}</span><b style="color:${rentPaid[current.id]?'var(--teal)':'var(--gold)'}">${rentPaid[current.id]?'PAID ✓':'DUE'}</b></div>
+    <button class="addbtn" style="width:100%;margin-top:10px" onclick="toggleRent()">${rentPaid[current.id]?'Mark October as NOT paid':'Mark October as PAID'}</button>`;
+  document.getElementById('rentHistory').innerHTML = months.map((m,i)=>`
+    <div class="asset"><span>${m}<small>${current.renter.name}</small></span><b style="color:${i===1?'var(--gold)':'var(--teal)'}">${i===1?'Paid late (sample)':'Paid on time (sample)'}</b></div>`).join('');
+}
+function toggleRent(){ rentPaid[current.id]=!rentPaid[current.id]; renderRent(); }
+function renderLease(){
+  document.getElementById('leaseRows').innerHTML = [
+    ['Lease document','📄 Signed Lease Agreement — stored in Documents'],
+    ['Renter', current.renter.name],['Lease term', current.renter.lease],
+    ['Monthly rent', current.renter.rent],['Security deposit held','$2,400 (sample)'],
+    ['Heads-up','⚠️ Sample reminder: review renewal 60 days before end date']
+  ].map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+}
+function renderEquity(){
+  const x = extra();
+  const eq = x.valueNow - x.balanceNum;
+  document.getElementById('equityRows').innerHTML = [
+    ['Bought for', money(x.purchase)],['Worth now (sample estimate)', money(x.valueNow)],
+    ['Loan balance', money(x.balanceNum)],['Equity', money(eq) + '  (' + Math.round(eq/x.valueNow*100) + '%)']
+  ].map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+}
+function renderKeys(){
+  document.getElementById('keysRows').innerHTML = extra().keys.map(([l,v])=>`
+    <div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+}
+/* Checklist */
+const CK_ITEMS = ["Living room — walls & floors","Kitchen — appliances tested","Kitchen — counters & cabinets","Main bedroom","Bathrooms — plumbing & fixtures","Windows & doors lock","AC / heat runs","Water heater checked","Keys handed over & counted","Meter readings recorded","Photos taken of every room"];
+let ckState = {}, ckMode = 'in';
+function renderCk(){
+  const key = current.id + '-' + ckMode;
+  if(!ckState[key]) ckState[key] = CK_ITEMS.map(()=>false);
+  const st = ckState[key];
+  document.getElementById('ckList').innerHTML = st.map((v,i)=>`
+    <label class="asset" style="cursor:pointer"><span>${CK_ITEMS[i]}</span><input type="checkbox" ${v?'checked':''} onchange="toggleCk(${i})" style="width:22px;height:22px;accent-color:var(--teal)"></label>`).join('');
+  const pct = Math.round(st.filter(Boolean).length / st.length * 100);
+  document.getElementById('ckBar').style.width = pct + '%';
+  document.getElementById('ckPct').textContent = pct + '% checked — ' + (ckMode==='in'?'Move-In':'Move-Out') + ' walkthrough';
+}
+function toggleCk(i){ const key=current.id+'-'+ckMode; ckState[key][i]=!ckState[key][i]; renderCk(); }
+function setCkMode(m){ ckMode=m; document.getElementById('ckIn').classList.toggle('on',m==='in'); document.getElementById('ckOut').classList.toggle('on',m==='out'); renderCk(); }
+/* Calendar (portfolio, Oct 2026 sample) */
+let calEvents = {1:["Rent due — all properties (sample)"],5:["HOA due — 780 Demo Grove (sample)"],15:["Loan payments — all properties (sample)"],20:["Insurance renewal review (sample)"],31:["Lease check: 9 Mockingbird (sample)"]};
+let calSel = 1;
+function renderCal(){
+  const grid = document.getElementById('calGrid'); if(!grid) return;
+  let cells = ['S','M','T','W','T','F','S'].map(d=>`<div style="text-align:center;color:var(--muted);font-size:11px;font-weight:700">${d}</div>`).join('');
+  for(let i=0;i<4;i++) cells += '<div></div>';
+  for(let d=1; d<=31; d++){
+    const has = calEvents[d] && calEvents[d].length;
+    cells += `<button onclick="selDay(${d})" style="border:1px solid ${d===calSel?'var(--gold)':'var(--line)'};background:${d===calSel?'var(--card2)':'var(--card)'};color:var(--text);border-radius:10px;padding:8px 0;font-weight:700;cursor:pointer">${d}${has?'<div style="color:var(--gold);font-size:9px;line-height:1">●</div>':'<div style="font-size:9px;line-height:1">&nbsp;</div>'}</button>`;
+  }
+  grid.innerHTML = cells;
+  const ev = calEvents[calSel]||[];
+  document.getElementById('calEvents').innerHTML = `<b>Oct ${calSel}, 2026</b>` + (ev.length ? ev.map(e=>`<div class="asset"><span>📌 ${e}</span></div>`).join('') : '<p class="note">Nothing due this day (sample).</p>');
+}
+function selDay(d){ calSel=d; renderCal(); }
+function addEvent(e){
+  e.preventDefault();
+  const d=Number(document.getElementById('eDay').value), t=document.getElementById('eTitle').value.trim();
+  if(!d||!t) return;
+  (calEvents[d]=calEvents[d]||[]).push(t+' (sample)'); calSel=d; renderCal(); e.target.reset();
+}
+function renderTax(){
+  let net=0;
+  document.getElementById('taxRows').innerHTML = PROPERTIES.map(p=>{
+    const t = EXTRA[p.id].tax; net += t[0]-t[1];
+    return `<div class="asset"><span>${p.addr}<small>Income ${money(t[0])} · Expenses ${money(t[1])} (sample)</small></span><b>${money(t[0]-t[1])}</b></div>`;
+  }).join('');
+  document.getElementById('taxNet').textContent = money(net);
+}
+/* Extend openProp with v2 renders */
+const _openProp = openProp;
+openProp = function(id){
+  _openProp(id);
+  renderKeys(); renderLease(); renderRent(); renderEquity(); renderBills(); renderDocs(); renderRepairs(); renderCk();
+};
+renderCal(); renderTax();
 renderList();
 </script>
 </body>
