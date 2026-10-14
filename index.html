@@ -5,10 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Property Command Center — Rough Draft</title>
 <style>
-  :root{
-    --bg:#0e1514; --bg2:#13201d; --card:#1a2925; --card2:#21352f; --line:rgba(255,255,255,.08);
-    --text:#f2f5f3; --muted:#9db4ac; --gold:#d4a94e; --teal:#3ec6a7; --red:#e0655f;
+  :root, :root[data-theme="A"]{
+    --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
+    --text:#E8F5F1; --muted:#9DBEB4; --gold:#2ED3A6; --teal:#2ED3A6; --acc2:#F5C451; --red:#FF7A6B;
     --radius:18px;
+  }
+  :root[data-theme="B"]{
+    --bg:#121024; --bg2:#181434; --card:#1E1B3A; --card2:#292550;
+    --text:#ECEAFF; --muted:#A79FD1; --gold:#8B7CF6; --teal:#38D6F5; --acc2:#38D6F5;
+  }
+  :root[data-theme="C"]{
+    --bg:#0A1220; --bg2:#0D1830; --card:#152238; --card2:#1E3050;
+    --text:#EAF2FF; --muted:#9DB8D9; --gold:#B5E048; --teal:#B5E048; --acc2:#5EA8FF;
+  }
+  :root[data-theme="D"]{
+    --bg:#141417; --bg2:#1A1A1E; --card:#1F1F24; --card2:#2A2A31;
+    --text:#F2F2F5; --muted:#A7A7B3; --gold:#FF7A59; --teal:#2EC4B6; --acc2:#2EC4B6;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(180deg,var(--bg2),var(--bg) 340px);color:var(--text)}
@@ -75,7 +87,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v3 — built on Bori's two pillars: your view, your call · accuracy, double-checked</div>
+      <div class="sub">Rough draft v4 — the study edition: hero numbers, needs-attention, vivid themes</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -95,23 +107,56 @@
         <div class="stat"><b>$9,000</b><small>Rent in / mo (sample)</small></div>
       </div>
 
-      <div class="section" style="margin-top:0">
+      <div class="section" id="mod-attention" style="margin-top:0">
+        <h3 style="margin:0 0 8px">🔔 Needs Attention</h3>
+        <div id="attentionList"></div>
+        <p class="note">The study's rule: max 3, most urgent first — from Copilot / Stripe / Airbnb dashboards. If it's empty, it says "All clear."</p>
+      </div>
+
+      <div class="section">
         <h3 style="margin:0 0 4px">⚙️ Customize My View — Pillar 1</h3>
         <p class="note" style="margin:0 0 8px">Built the way the owner wants it — and anything here can be dropped just as easily. Flip a switch: that module disappears. Flip it back: it's back. Easy to manage, nothing forced.</p>
         <div style="font-weight:800;font-size:13px;margin-top:8px">Home sections</div>
         <div id="prefHome"></div>
         <div style="font-weight:800;font-size:13px;margin-top:10px">Inside each property (tabs)</div>
         <div id="prefTabs"></div>
+        <div style="font-weight:800;font-size:13px;margin-top:12px">Color theme — vivid, easy on the eyes (from the study)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <button onclick="setTheme('A')" style="border:1px solid var(--line);background:#14302D;color:#E8F5F1;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">🟢 A · Emerald Ledger<br><small style="color:#2ED3A6">mint + amber</small></button>
+          <button onclick="setTheme('B')" style="border:1px solid var(--line);background:#1E1B3A;color:#ECEAFF;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">🟣 B · Indigo Command<br><small style="color:#8B7CF6">violet + cyan</small></button>
+          <button onclick="setTheme('C')" style="border:1px solid var(--line);background:#152238;color:#EAF2FF;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">🔵 C · Navy + Lime<br><small style="color:#B5E048">lime + blue</small></button>
+          <button onclick="setTheme('D')" style="border:1px solid var(--line);background:#1F1F24;color:#F2F2F5;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">⚫ D · Charcoal + Coral<br><small style="color:#FF7A59">coral + teal</small></button>
+        </div>
+        <p class="note">Four palettes from the study — instantly different families, all dark and tinted (never pure black/white), one vivid accent each. Your pick sticks on this phone.</p>
       </div>
 
       <div class="section" id="mod-money">
         <h3 style="margin:0 0 8px">💵 Money Dashboard — whole portfolio</h3>
+        <p style="margin:0 0 6px;font-size:15px;line-height:1.45">You keep <b>$1,750</b> this month after loans and bills — <b>up $140 vs last month</b>, mostly because repairs were lower. <span style="color:var(--muted);font-size:12px">(Plain-language insight first — Apple Health / Airbnb pattern, sample.)</span></p>
+        <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:8px 0 2px">
+          <div><small style="color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-size:11px">Net this month</small><div style="font-size:38px;font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums">$1,750</div></div>
+          <span class="chip" style="color:var(--teal);font-weight:800">▲ $140 vs Sep (sample)</span>
+        </div>
+        <svg viewBox="0 0 260 56" width="100%" height="56" preserveAspectRatio="none" aria-label="Net trend sparkline">
+          <polyline points="0,40 52,30 104,34 156,22 208,30 260,14" fill="none" stroke="var(--acc2)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="260" cy="14" r="3.5" fill="var(--acc2)"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:11px"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
+        <p class="note" style="margin-top:4px">Net trend (sample) — sparkline: the shape of the trend, no axes, no clutter.</p>
         <div class="row"><span><small>Rent coming in</small></span><b style="color:var(--teal)" id="mdRent">$9,000 / mo</b></div>
         <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:100%;height:100%;background:var(--teal);border-radius:6px"></div></div>
         <div class="row"><span><small>Loan payments + property bills</small></span><b style="color:var(--red)" id="mdCosts">$7,250 / mo</b></div>
         <div style="background:var(--bg);border-radius:6px;height:8px;margin:2px 0 8px"><div style="width:81%;height:100%;background:var(--red);border-radius:6px"></div></div>
         <div class="total"><span>Net (sample)</span><span id="mdNet">$1,750 / mo</span></div>
         <div id="dataCheck" style="margin-top:10px;font-size:13px;font-weight:700"></div>
+        <h4 style="margin:16px 0 6px">Rent by property — ranked (sample)</h4>
+        <div style="display:grid;gap:7px;font-size:13px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:118px;color:var(--muted)">22 Sample Bay Ct</span><div style="flex:1;background:var(--bg);border-radius:6px;height:10px"><div style="width:100%;height:100%;background:var(--gold);border-radius:6px"></div></div><b>$2,650</b></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:118px;color:var(--muted)">101 Sample Palms</span><div style="flex:1;background:var(--bg);border-radius:6px;height:10px"><div style="width:91%;height:100%;background:var(--gold);border-radius:6px"></div></div><b>$2,400</b></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:118px;color:var(--muted)">9 Mockingbird Ln</span><div style="flex:1;background:var(--bg);border-radius:6px;height:10px"><div style="width:79%;height:100%;background:var(--gold);border-radius:6px"></div></div><b>$2,100</b></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:118px;color:var(--muted)">780 Demo Grove</span><div style="flex:1;background:var(--bg);border-radius:6px;height:10px"><div style="width:70%;height:100%;background:var(--gold);border-radius:6px"></div></div><b>$1,850</b></div>
+        </div>
+        <p class="note">Ranked bars (Monarch pattern): biggest first, value at the end — comparisons read at a glance.</p>
         <p class="note">Sample math from the 4 fake properties below — the shape of the dashboard, not real money.</p>
         <p class="note" style="border-top:1px solid var(--line);padding-top:10px"><b>🛡️ Accuracy Protocol — Pillar 2:</b> automated data is double-checked before it's displayed, and any contradiction gets <b>flagged before you see it</b> — never passed along silently. Data you type in yourself is confirmed by you; the protocol covers the automated numbers.</p>
       </div>
@@ -142,6 +187,10 @@
 
     <!-- Single property detail -->
     <div id="detailView" class="hidden">
+      <div style="position:sticky;top:8px;z-index:5;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;box-shadow:0 6px 18px rgba(0,0,0,.35)">
+        <b id="sbAddr" style="font-size:14px">Property</b>
+        <span id="sbRent" class="chip"></span>
+      </div>
       <button class="back" onclick="showList()">← All properties</button>
       <div class="photo p1" id="dPhoto" style="border-radius:18px;height:120px"></div>
       <h2 id="dAddr" style="font-size:20px;margin-bottom:2px"></h2>
@@ -170,7 +219,8 @@
 
       <div class="section hidden" data-pane="renter">
         <div id="renterRows"></div>
-        <p class="note">All renter details for this property, at hand in one place. (Sample person — fake info only.)</p>
+        <div id="crmCard"></div>
+        <p class="note">All renter details for this property, at hand in one place. (Sample person — fake info only.) The contact-card layout (money strip, timeline, next step, quick actions) is the CRM pattern from the study — everything about this person in one place.</p>
       </div>
 
       <div class="section hidden" data-pane="lease">
@@ -323,6 +373,7 @@ function renderList(){
         <div class="chips">
           <span class="chip"><b>${p.beds}</b> bed</span><span class="chip"><b>${p.baths}</b> bath</span>
           <span class="chip"><b>${p.sqft}</b> sq ft</span><span class="chip">Renter: <b>${p.renter.name}</b></span>
+          ${rentPaid[p.id] ? '<span class="chip"><b style="color:var(--teal)">● RENT PAID</b></span>' : '<span class="chip"><b style="color:var(--red)">● RENT DUE</b></span>'}
         </div>
       </div>
     </button>`).join('');
@@ -363,8 +414,8 @@ function renderPhotos(){
     <div class="ph ${cls}" style="filter:hue-rotate(${i*12}deg)">📷 ${name}<br><small>Before move-in</small></div>`).join('');
 }
 function renderPeople(){
-  document.getElementById('peopleList').innerHTML = current.people.map(p=>`
-    <div class="person"><div class="avatar">${p[0]}</div><div>${p[2]}<small>${p[1]} · ${p[3]}</small></div><div class="call">Call</div></div>`).join('');
+  document.getElementById('peopleList').innerHTML = current.people.map((p,i)=>`
+    <div class="person"><div class="avatar">${p[0]}</div><div>${p[2]}<small>${p[1]} · ${p[3]}<br><span class="chip" style="font-size:11px">${i===0?'Regular · Insurance cert on file — renews Mar 2027 (sample)':'Regular (sample)'}</span></small></div><a class="call" href="tel:${p[3].replace(/[^0-9]/g,'')}">Call</a></div>`).join('');
 }
 function addAsset(e){
   e.preventDefault();
@@ -471,7 +522,7 @@ function renderRent(){
   document.getElementById('rentHistory').innerHTML = months.map((m,i)=>`
     <div class="asset"><span>${m}<small>${current.renter.name}</small></span><b style="color:${i===1?'var(--gold)':'var(--teal)'}">${i===1?'Paid late (sample)':'Paid on time (sample)'}</b></div>`).join('');
 }
-function toggleRent(){ rentPaid[current.id]=!rentPaid[current.id]; renderRent(); }
+function toggleRent(){ rentPaid[current.id]=!rentPaid[current.id]; renderRent(); renderAttention(); renderList(); updateSticky(); }
 function renderLease(){
   document.getElementById('leaseRows').innerHTML = [
     ['Lease document','📄 Signed Lease Agreement — stored in Documents'],
@@ -541,12 +592,12 @@ function renderTax(){
 const _openProp = openProp;
 openProp = function(id){
   _openProp(id);
-  renderKeys(); renderLease(); renderRent(); renderEquity(); renderBills(); renderDocs(); renderRepairs(); renderCk();
+  renderKeys(); renderLease(); renderRent(); renderEquity(); renderBills(); renderDocs(); renderRepairs(); renderCk(); renderCrm(); updateSticky();
 };
 /* ===== THE TWO PILLARS (Bori, Oct 14) ===== */
 /* Pillar 1 — Customize: any module can be dropped as easily as it was added */
 const PREF_DEFS = [
-  ['money','Money Dashboard','home'], ['calendar','Calendar','home'], ['tax','Year-End Tax Summary','home'],
+  ['attention','Needs Attention','home'], ['money','Money Dashboard','home'], ['calendar','Calendar','home'], ['tax','Year-End Tax Summary','home'],
   ['tab_renter','Renter tab','tab'], ['tab_lease','Lease tab','tab'], ['tab_rent','Rent Tracker tab','tab'],
   ['tab_loan','Loan tab','tab'], ['tab_bills','Bills tab','tab'], ['tab_docs','Documents tab','tab'],
   ['tab_photos','Photos tab','tab'], ['tab_checklist','Move In / Out tab','tab'], ['tab_people','Service People tab','tab'],
@@ -562,7 +613,7 @@ function renderPrefs(){
 }
 function tabName(key){ return key.replace('tab_',''); }
 function applyPrefs(){
-  const map = {money:'mod-money', calendar:'mod-calendar', tax:'mod-tax'};
+  const map = {attention:'mod-attention', money:'mod-money', calendar:'mod-calendar', tax:'mod-tax'};
   Object.entries(map).forEach(([k,id])=>{ const el=document.getElementById(id); if(el) el.style.display = prefs[k] ? '' : 'none'; });
   document.querySelectorAll('.tabs button').forEach(b=>{
     const k = 'tab_' + b.dataset.tab;
@@ -591,6 +642,51 @@ function runDataCheck(){
     el.innerHTML = '⚠️ <span style="color:var(--red)">CONTRADICTION FLAGGED</span> <span style="color:var(--muted);font-weight:400">— the displayed totals do not match their parts (recomputed: ' + money(rent) + ' in − ' + money(costs) + ' out = ' + money(net) + ' net). Flagged before display, per the accuracy protocol — review before trusting these numbers.</span>';
   }
 }
+/* ===== v4 — study edition (display techniques + themes + CRM card) ===== */
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('recc_theme', t); } catch(e){}
+}
+try { const savedTheme = localStorage.getItem('recc_theme'); if(savedTheme) document.documentElement.dataset.theme = savedTheme; } catch(e){}
+function renderAttention(){
+  const el = document.getElementById('attentionList'); if(!el) return;
+  const items = [];
+  PROPERTIES.forEach(p=>{ if(!rentPaid[p.id]) items.push(['🔴','Rent due — ' + p.addr, p.renter.rent + ' · ' + p.renter.name + ' (sample)']); });
+  items.push(['🟠','Lease ending soon — 101 Sample Palms Dr','Ends Dec 31, 2026 · 78 days (sample)']);
+  items.push(['🟡','Insurance cert renews — Mike\'s Sample Plumbing','Mar 2027 · from Service People (sample)']);
+  const top = items.slice(0,3);
+  el.innerHTML = top.length ? top.map(([i,t,s])=>`
+    <div class="asset"><span>${i} ${t}<small>${s}</small></span></div>`).join('')
+    : '<p style="margin:4px 0">✅ All clear — nothing needs you right now.</p>';
+}
+function updateSticky(){
+  if(!current) return;
+  document.getElementById('sbAddr').textContent = current.addr;
+  document.getElementById('sbRent').innerHTML = rentPaid[current.id] ? '<b style="color:var(--teal)">● RENT PAID</b>' : '<b style="color:var(--red)">● RENT DUE</b>';
+}
+function renderCrm(){
+  const r = current.renter;
+  const digits = r.phone.replace(/[^0-9]/g,'');
+  const rentNum = parseMoneyStr(r.rent);
+  const paidYtd = rentNum * 9;
+  document.getElementById('crmCard').innerHTML = `
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <a href="tel:${digits}" style="flex:1;text-align:center;background:var(--gold);color:#10131a;font-weight:900;padding:11px;border-radius:12px;text-decoration:none">📞 Call</a>
+      <a href="sms:${digits}" style="flex:1;text-align:center;background:var(--card2);color:var(--text);font-weight:900;padding:11px;border-radius:12px;text-decoration:none;border:1px solid var(--line)">💬 Text</a>
+      <a href="mailto:${r.email}" style="flex:1;text-align:center;background:var(--card2);color:var(--text);font-weight:900;padding:11px;border-radius:12px;text-decoration:none;border:1px solid var(--line)">✉️ Email</a>
+    </div>
+    <div class="row" style="margin-top:8px"><span><small>Stage (CRM)</small></span><b><span class="chip"><b style="color:var(--teal)">● Current renter</b></span></b></div>
+    <div class="row"><span><small>Next step · due</small></span><b>Send lease renewal packet · by Nov 1, 2026 (sample)</b></div>
+    <div class="row"><span><small>Money strip — paid this year</small></span><b>${money(paidYtd)} · 1 late (sample)</b></div>
+    <h4 style="margin:14px 0 4px">Timeline — everything with this renter</h4>
+    <div>
+      <div class="asset"><span>💵 Rent paid — Sep 2026<small>Oct 1, 2026 due next (sample)</small></span></div>
+      <div class="asset"><span>🔧 Service visit logged<small>See Repairs in Asset Checkup (sample)</small></span></div>
+      <div class="asset"><span>📷 Move-in photos taken<small>Before photos — proof of state (sample)</small></span></div>
+      <div class="asset"><span>📄 Lease signed<small>${r.lease} (sample)</small></span></div>
+    </div>`;
+}
+renderAttention();
 renderPrefs(); applyPrefs(); runDataCheck();
 renderCal(); renderTax();
 renderList();
