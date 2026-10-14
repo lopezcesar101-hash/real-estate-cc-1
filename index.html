@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property Command Center — Rough Draft v8</title>
+<title>Property Command Center — Rough Draft v9</title>
 <style>
   :root, :root[data-theme="A"]{
     --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
@@ -103,7 +103,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v8 — tenant background check section, on/off by the administrator</div>
+      <div class="sub">Rough draft v9 — every section switchable on/off by the administrator</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -358,8 +358,8 @@
     <div data-page="more" class="hidden">
       <div class="section" style="margin-top:2px">
         <h3>⚙️ Customize My View — Pillar 1</h3>
-        <p class="note" style="margin:0 0 8px">Anything here can be dropped just as easily as it was added. Flip a switch: it disappears. Flip it back: it's back. Nothing forced.</p>
-        <div style="font-weight:800;font-size:13px;margin-top:8px">Sections</div>
+        <p class="note" style="margin:0 0 8px">Anything here can be dropped just as easily as it was added. Flip a switch: it disappears — section <i>and</i> its index shortcut. Flip it back: it's back. Nothing forced. <b>Every section in the app has a switch here</b> — that's how the administrator shapes the app to each customer.</p>
+        <div style="font-weight:800;font-size:13px;margin-top:8px">Sections — all of them</div>
         <div id="prefList"></div>
         <div style="font-weight:800;font-size:13px;margin-top:12px">Color theme — vivid, easy on the eyes</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
@@ -387,7 +387,7 @@
     </div>
   </div>
 
-  <footer>ROUGH DRAFT v8 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+  <footer>ROUGH DRAFT v9 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
 </div>
 
 <!-- bottom dock -->
@@ -746,7 +746,10 @@ function renderTax(){
 /* ================= PILLARS: customize + accuracy ================= */
 const PREF_DEFS = [
   ['mod-attention','Needs Attention (Overview)'], ['mod-money','Money Dashboard'], ['mod-tax','Year-End Tax Summary'], ['mod-calendar','Calendar'],
-  ['sec-lease','Lease section'], ['sec-background','Tenant Background Check section'], ['sec-rent','Rent Tracker'], ['sec-bills','Bills section'], ['sec-docs','Documents section'], ['sec-checklist','Move In/Out Checklist'], ['sec-people','Service People section'],
+  ['sec-property','Property Details + Keys & Access'], ['sec-photos','Photos — proof of state'], ['sec-checklist','Move In/Out Checklist'],
+  ['sec-renter','Renter contact card'], ['sec-lease','Lease section'], ['sec-background','Tenant Background Check section'], ['sec-people','Service People section'],
+  ['sec-rent','Rent Tracker'], ['sec-loan','Loan + Equity section'], ['sec-bills','Bills section'],
+  ['sec-assets','Assets (appliances)'], ['sec-repairs','Repairs & Maintenance log'], ['sec-docs','Documents section'],
 ];
 let prefs = {};
 try { prefs = JSON.parse(localStorage.getItem('recc_prefs')||'{}'); } catch(e){ prefs = {}; }
