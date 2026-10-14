@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property Command Center — Rough Draft v10</title>
+<title>Property Command Center — Rough Draft v11</title>
 <style>
   :root, :root[data-theme="A"]{
     --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
@@ -44,9 +44,9 @@
   .note{color:var(--muted);font-size:12px;line-height:1.5;margin-top:10px}
   .hidden{display:none!important}
   /* property cards */
-  .prop{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:14px;cursor:pointer;text-align:left;width:100%;color:var(--text);padding:0}
+  .prop{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:16px;cursor:pointer;text-align:left;width:100%;color:var(--text);padding:0;box-shadow:0 10px 24px rgba(0,0,0,.28)}
   .prop:active{transform:scale(.99)}
-  .photo{height:120px;display:flex;align-items:flex-end;padding:12px;font-weight:800;font-size:15px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+  .photo{height:134px;display:flex;align-items:flex-end;padding:13px;font-weight:800;font-size:15.5px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
   .p1{background:linear-gradient(135deg,#2e6f5e,#173f35 60%,#0f2a23)}
   .p2{background:linear-gradient(135deg,#7a5a26,#4a3512 60%,#2b1e08)}
   .p3{background:linear-gradient(135deg,#33566e,#1d3547 60%,#12222f)}
@@ -103,7 +103,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v10 — complete: property tax, owner notes + vacancy mode added</div>
+      <div class="sub">Rough draft v11 — soft start: locations lead, calm surface, accuracy untouched</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -116,20 +116,22 @@
   <div id="ownerSide">
     <!-- ================= PAGE: HOME ================= -->
     <div data-page="home">
-      <div class="section" id="mod-attention" style="margin-top:2px">
-        <h3>🔔 Needs Attention</h3>
-        <div id="attentionList"></div>
-        <p class="note">Max 3, most urgent first (Copilot / Stripe / Airbnb pattern). Empty means "All clear."</p>
-      </div>
-      <div class="stats" style="margin-top:12px">
+      <h2 style="margin-top:4px">📍 Your locations</h2>
+      <p class="note" style="margin:0 0 10px;font-size:13px">Your whole portfolio, calm and at a glance. Tap any location to open it — everything about it lives inside, organized and labeled.</p>
+      <input id="propSearch" placeholder="🔎 Find a location — address, city, or tenant name" oninput="renderList()">
+      <div id="propList" style="margin-top:12px"></div>
+      <p class="note">Lively color = a tenant lives there now. An unoccupied location is unmistakable: dark, desaturated, dashed outline, and a bold <b>VACANT — NO TENANT</b> banner — but <b>still fully functional</b>: tap it and everything opens the same.</p>
+      <div style="font-weight:800;font-size:13px;margin:20px 0 6px;color:var(--muted)">PORTFOLIO SNAPSHOT</div>
+      <div class="stats">
         <div class="stat"><b id="statCount">5</b><small>Locations</small></div>
         <div class="stat"><b>$9,000</b><small>Rent in / mo</small></div>
         <div class="stat"><b>$1,750</b><small>Net / mo (sample)</small></div>
       </div>
-      <h2>📍 Locations — all of them, most pertinent info first</h2>
-      <input id="propSearch" placeholder="🔎 Find a location — address, city, or tenant name" oninput="renderList()">
-      <div id="propList" style="margin-top:12px"></div>
-      <p class="note">Lively color = a tenant lives there now. An unoccupied location is unmistakable: dark, desaturated, dashed outline, and a bold <b>VACANT — NO TENANT</b> banner — but <b>still fully functional</b>: tap it and everything opens the same. Tap any location to open its full page — every detail, organized and labeled.</p>
+      <div class="section" id="mod-attention" style="margin-top:12px">
+        <h3>🔔 Needs Attention</h3>
+        <div id="attentionList"></div>
+        <p class="note">A quiet snapshot — at most 3 things, most urgent first. Empty means "All clear." The automation watches this so you don't have to.</p>
+      </div>
     </div>
 
     <!-- ================= LOCATION FULL PAGE ================= -->
@@ -404,7 +406,7 @@
     </div>
   </div>
 
-  <footer>ROUGH DRAFT v10 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+  <footer>ROUGH DRAFT v11 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
 </div>
 
 <!-- bottom dock -->
