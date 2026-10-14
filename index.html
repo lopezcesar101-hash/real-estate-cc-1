@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property Command Center — Rough Draft v6</title>
+<title>Property Command Center — Rough Draft v7</title>
 <style>
   :root, :root[data-theme="A"]{
     --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
@@ -60,8 +60,14 @@
   /* bottom dock — the app's main tabs */
   .dock{position:fixed;left:0;right:0;bottom:0;z-index:50;background:color-mix(in srgb, var(--card) 92%, black);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
   .dock-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
-  .prop.vacant .photo{filter:grayscale(1);opacity:.72}
-  .prop.vacant .pbody{opacity:.82}
+  .prop.vacant{border:2px dashed #9aa1ab;background:repeating-linear-gradient(135deg,rgba(255,255,255,.018) 0 12px,transparent 12px 24px),#17191d;box-shadow:none;filter:saturate(.22)}
+  .prop.vacant .photo{position:relative;overflow:hidden;filter:grayscale(1) brightness(.52) contrast(.95);opacity:1}
+  .prop.vacant .photo::after{content:"VACANT";position:absolute;right:-36px;top:17px;transform:rotate(35deg);background:#050607;color:#fff;border:1px solid rgba(255,255,255,.68);padding:6px 44px;font-size:13px;letter-spacing:3px;font-weight:900;text-shadow:none;box-shadow:0 3px 10px rgba(0,0,0,.55)}
+  .prop.vacant .pbody{opacity:.78;filter:grayscale(.65)}
+  .vacant-flag{display:flex;align-items:center;justify-content:center;gap:8px;background:repeating-linear-gradient(135deg,#26282c 0 14px,#111214 14px 28px);color:#f2f2f2;border-bottom:2px dashed #9aa1ab;padding:10px 8px;font-size:13px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}
+  .status-vacant{background:#050607!important;border:1px solid rgba(255,255,255,.72)!important;color:#fff!important}
+  .vacant-hero{margin-top:12px;background:repeating-linear-gradient(135deg,#26282c 0 14px,#111214 14px 28px);border:2px dashed #9aa1ab;border-radius:16px;color:#fff;padding:14px;text-align:center;font-weight:900;letter-spacing:1.4px;text-transform:uppercase}
+  .vacant-hero span{display:block;margin-top:5px;font-size:12px;letter-spacing:.2px;text-transform:none;font-weight:700;color:#d7d7d7}
   .dock button{border:0;background:transparent;color:var(--muted);font-size:11px;font-weight:700;padding:7px 2px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
   .dock button .ic{font-size:20px;line-height:1}
   .dock button.on{color:var(--gold);background:var(--card2)}
@@ -97,7 +103,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v6 — checklist upgraded: notes, photo/video/file uploads, add & remove items</div>
+      <div class="sub">Rough draft v7 — checklist upgraded + unoccupied locations stand out</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -123,7 +129,7 @@
       <h2>📍 Locations — all of them, most pertinent info first</h2>
       <input id="propSearch" placeholder="🔎 Find a location — address, city, or tenant name" oninput="renderList()">
       <div id="propList" style="margin-top:12px"></div>
-      <p class="note">Lively color = a tenant lives there now. Grayed out = no tenant — <b>still fully functional</b>: tap it and everything opens the same. Tap any location to open its full page — every detail, organized and labeled.</p>
+      <p class="note">Lively color = a tenant lives there now. An unoccupied location is unmistakable: dark, desaturated, dashed outline, and a bold <b>VACANT — NO TENANT</b> banner — but <b>still fully functional</b>: tap it and everything opens the same. Tap any location to open its full page — every detail, organized and labeled.</p>
     </div>
 
     <!-- ================= LOCATION FULL PAGE ================= -->
@@ -136,6 +142,7 @@
         <div class="photo p1" id="dPhoto" style="border-radius:18px;height:110px"></div>
         <h2 id="dAddr" style="font-size:20px;margin-bottom:2px"></h2>
         <div class="sub" id="dMeta"></div>
+        <div id="vacantHero" class="vacant-hero hidden">⛔ Vacant — no tenant here<span>Not earning rent · Still fully open and manageable</span></div>
 
         <div class="gtabs">
           <button class="on" data-group="overview" onclick="setGroup(this)">🏠<br>Overview</button>
@@ -372,7 +379,7 @@
     </div>
   </div>
 
-  <footer>ROUGH DRAFT v6 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+  <footer>ROUGH DRAFT v7 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
 </div>
 
 <!-- bottom dock -->
@@ -472,7 +479,7 @@ function showList(){ goPage('home'); }
 
 /* ================= OVERVIEW — locations with pertinent info ================= */
 function statusPill(p){
-  if(p.vacant) return '<span class="chip"><b style="color:#B9B9B9">● VACANT</b></span>';
+  if(p.vacant) return '<span class="chip status-vacant"><b style="color:#fff">⛔ UNOCCUPIED</b></span>';
   return rentPaid[p.id] ? '<span class="chip"><b style="color:var(--teal)">● RENT PAID</b></span>' : '<span class="chip"><b style="color:var(--red)">● RENT DUE</b></span>';
 }
 function renderList(){
@@ -480,13 +487,14 @@ function renderList(){
   const list = PROPERTIES.filter(p => (p.addr+' '+p.city+' '+p.renter.name+' '+p.type).toLowerCase().includes(q));
   document.getElementById('propList').innerHTML = list.length ? list.map(p=>`
     <button class="prop ${p.vacant?'vacant':''}" onclick="openProp(${p.id})">
+      ${p.vacant ? '<div class="vacant-flag">⛔ Vacant — no tenant</div>' : ''}
       <div class="photo ${p.cls}">${p.addr}</div>
       <div class="pbody">
-        <div class="addr">${p.addr}</div>
+        <div class="addr">${p.vacant?'⛔ ':''}${p.addr}</div>
         <div class="meta">${p.city} · ${p.type} · ${p.beds} bed · ${p.baths} bath · ${p.sqft} sq ft</div>
         <div class="chips">
           ${p.vacant
-            ? `<span class="chip">Tenant: <b>None</b></span><span class="chip"><b>${p.asking}</b></span>`
+            ? `<span class="chip">Tenant: <b>None</b></span><span class="chip"><b>${p.asking}</b></span><span class="chip"><b>Not earning rent</b></span>`
             : `<span class="chip">Tenant: <b>${p.renter.name}</b></span><span class="chip">Rent: <b>${p.renter.rent.replace(' (sample)','')}</b></span><span class="chip">Lease ends: <b>${p.renter.lease.split('– ')[1]||''}</b></span>`}
           ${statusPill(p)}
         </div>
@@ -498,7 +506,7 @@ function renderAttention(){
   const el = document.getElementById('attentionList'); if(!el) return;
   const items = [];
   PROPERTIES.forEach(p=>{ if(!p.vacant && !rentPaid[p.id]) items.push(['🔴','Rent due — ' + p.addr, p.renter.rent + ' · ' + p.renter.name + ' (sample)']); });
-  PROPERTIES.forEach(p=>{ if(p.vacant) items.push(['⚪','Vacant — ' + p.addr, p.asking + ' · no tenant yet (sample)']); });
+  PROPERTIES.forEach(p=>{ if(p.vacant) items.push(['⛔','UNOCCUPIED — ' + p.addr, p.asking + ' · no tenant · not earning rent (sample)']); });
   items.push(['🟠','Lease ending soon — 101 Sample Palms Dr','Ends Dec 31, 2026 · 78 days (sample)']);
   const top = items.slice(0,3);
   el.innerHTML = top.length ? top.map(([i,t,s])=>`<div class="asset"><span>${i} ${t}<small>${s}</small></span></div>`).join('') : '<p style="margin:4px 0">✅ All clear — nothing needs you right now.</p>';
@@ -512,9 +520,10 @@ function openProp(id){
   document.getElementById('detailView').classList.remove('hidden');
   document.querySelectorAll('.dock button').forEach(b=>b.classList.toggle('on', b.dataset.dock==='home'));
   const ph = document.getElementById('dPhoto'); ph.className = 'photo ' + current.cls; ph.textContent = current.addr;
-  if(current.vacant) ph.style.filter='grayscale(1)'; else ph.style.filter='';
-  document.getElementById('dAddr').textContent = current.addr + (current.vacant ? ' — VACANT' : '');
+  if(current.vacant){ ph.style.filter='grayscale(1) brightness(.52) contrast(.95)'; ph.style.border='2px dashed #9aa1ab'; } else { ph.style.filter=''; ph.style.border=''; }
+  document.getElementById('dAddr').textContent = current.addr + (current.vacant ? ' — ⛔ VACANT' : '');
   document.getElementById('dMeta').textContent = current.city + ' · ' + current.type;
+  document.getElementById('vacantHero').classList.toggle('hidden', !current.vacant);
   document.querySelector('[data-group="people"]').style.filter = current.vacant ? 'grayscale(1) opacity(.65)' : '';
   document.getElementById('propertyRows').innerHTML = kvRows([['Address',current.addr],['City',current.city],['Type',current.type],['Bedrooms',current.beds],['Bathrooms',current.baths],['Sq ft',current.sqft],['Year built',current.year],['Lot',current.lot],['Status', current.vacant ? 'VACANT — no tenant (still fully manageable)' : 'Occupied — tenant in place']]);
   document.getElementById('keysRows').innerHTML = extra().keys.map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
@@ -530,7 +539,8 @@ function openProp(id){
 function updateSticky(){
   if(!current) return;
   document.getElementById('sbAddr').textContent = current.addr;
-  document.getElementById('sbRent').innerHTML = current.vacant ? '<b style="color:#B9B9B9">● VACANT</b>' : (rentPaid[current.id] ? '<b style="color:var(--teal)">● RENT PAID</b>' : '<b style="color:var(--red)">● RENT DUE</b>');
+  document.getElementById('sbRent').innerHTML = current.vacant ? '<b style="color:#fff">⛔ UNOCCUPIED</b>' : (rentPaid[current.id] ? '<b style="color:var(--teal)">● RENT PAID</b>' : '<b style="color:var(--red)">● RENT DUE</b>');
+  if(current.vacant) document.getElementById('sbRent').classList.add('status-vacant'); else document.getElementById('sbRent').classList.remove('status-vacant');
 }
 /* --- Renter & Lease group --- */
 function renderCrm(){
