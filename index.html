@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Property Command Center — Rough Draft</title>
+<style>
+  :root{
+    --bg:#0e1514; --bg2:#13201d; --card:#1a2925; --card2:#21352f; --line:rgba(255,255,255,.08);
+    --text:#f2f5f3; --muted:#9db4ac; --gold:#d4a94e; --teal:#3ec6a7; --red:#e0655f;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(180deg,var(--bg2),var(--bg) 340px);color:var(--text)}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 90px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 4px}
+  h1{font-size:24px;margin:0;line-height:1.15;letter-spacing:.2px}
+  h1 span{color:var(--gold)}
+  .sub{color:var(--muted);font-size:13px;margin-top:5px}
+  .badge{background:rgba(212,169,78,.16);color:var(--gold);border:1px solid rgba(212,169,78,.4);font-size:11px;font-weight:700;padding:5px 9px;border-radius:999px;white-space:nowrap}
+  .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:16px 0}
+  .seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:999px;font-size:14px;font-weight:700;cursor:pointer}
+  .seg button.on{background:var(--gold);color:#1a1405}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:6px 0 16px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px 12px}
+  .stat b{font-size:20px;display:block}
+  .stat small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+  h2{font-size:16px;margin:20px 0 10px}
+  .prop{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:14px;cursor:pointer;text-align:left;width:100%;color:var(--text);padding:0}
+  .prop:active{transform:scale(.99)}
+  .photo{height:132px;display:flex;align-items:flex-end;padding:12px;font-weight:800;font-size:15px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+  .p1{background:linear-gradient(135deg,#2e6f5e,#173f35 60%,#0f2a23)}
+  .p2{background:linear-gradient(135deg,#7a5a26,#4a3512 60%,#2b1e08)}
+  .p3{background:linear-gradient(135deg,#33566e,#1d3547 60%,#12222f)}
+  .p4{background:linear-gradient(135deg,#5e3a5e,#38223a 60%,#241426)}
+  .pbody{padding:13px 14px 15px}
+  .pbody .addr{font-weight:800;font-size:16px}
+  .pbody .meta{color:var(--muted);font-size:13px;margin-top:3px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:5px 9px;border-radius:999px}
+  .chip b{color:var(--text)}
+  .back{border:0;background:var(--card);color:var(--text);border:1px solid var(--line);padding:9px 13px;border-radius:999px;font-weight:700;cursor:pointer;margin-bottom:12px}
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:10px 0 4px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:9px 13px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer}
+  .tabs button.on{background:var(--teal);color:#06231b;border-color:transparent}
+  .section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px;margin-top:12px}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .row:last-child{border-bottom:0}
+  .row small{color:var(--muted);display:block;font-size:12px}
+  .row b{text-align:right}
+  .asset{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .asset:last-child{border-bottom:0}
+  .asset small{color:var(--muted);display:block}
+  .total{display:flex;justify-content:space-between;font-weight:900;font-size:16px;padding-top:12px}
+  .total span:last-child{color:var(--gold)}
+  .photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ph{height:96px;border-radius:14px;display:flex;align-items:flex-end;padding:9px;font-size:12px;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,.6);border:1px solid var(--line)}
+  .person{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .person:last-child{border-bottom:0}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+  .person small{color:var(--muted);display:block;font-size:12px}
+  .person .call{margin-left:auto;color:var(--teal);font-weight:800;font-size:13px;white-space:nowrap}
+  form{display:grid;gap:9px;margin-top:12px}
+  input,select{background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px 12px;font-size:14px;width:100%}
+  .addbtn{background:var(--gold);color:#1a1405;border:0;border-radius:12px;padding:12px;font-weight:900;font-size:14px;cursor:pointer}
+  .note{color:var(--muted);font-size:12px;line-height:1.5;margin-top:10px}
+  .hidden{display:none!important}
+  .renter-hero{background:linear-gradient(135deg,#2e6f5e,#122b25);border:1px solid var(--line);border-radius:22px;padding:18px}
+  footer{color:var(--muted);font-size:11px;text-align:center;margin-top:28px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Property <span>Command Center</span></h1>
+      <div class="sub">Rough draft v1 — owner side first, built from Bori's ideas so far</div>
+    </div>
+    <div class="badge">SAMPLE DATA</div>
+  </header>
+
+  <div class="seg" role="tablist">
+    <button id="segOwner" class="on" onclick="setSide('owner')">Owner Side</button>
+    <button id="segRenter" onclick="setSide('renter')">Renter Side</button>
+  </div>
+
+  <!-- ============ OWNER SIDE ============ -->
+  <div id="ownerSide">
+    <!-- Portfolio / property list -->
+    <div id="listView">
+      <div class="stats">
+        <div class="stat"><b id="statCount">4</b><small>Properties</small></div>
+        <div class="stat"><b>4</b><small>Occupied (sample)</small></div>
+        <div class="stat"><b>$—</b><small>Portfolio loan view later</small></div>
+      </div>
+      <h2>My Properties — one at a time</h2>
+      <div id="propList"></div>
+      <p class="note">Tap a property to open everything for that one property: renter, property details, its loan, its asset checkup list, its condition photos, and its service people.</p>
+    </div>
+
+    <!-- Single property detail -->
+    <div id="detailView" class="hidden">
+      <button class="back" onclick="showList()">← All properties</button>
+      <div class="photo p1" id="dPhoto" style="border-radius:18px;height:120px"></div>
+      <h2 id="dAddr" style="font-size:20px;margin-bottom:2px"></h2>
+      <div class="sub" id="dMeta"></div>
+
+      <div class="tabs">
+        <button class="on" data-tab="property" onclick="setTab(this)">Property</button>
+        <button data-tab="renter" onclick="setTab(this)">Renter</button>
+        <button data-tab="loan" onclick="setTab(this)">Loan</button>
+        <button data-tab="assets" onclick="setTab(this)">Asset Checkup</button>
+        <button data-tab="photos" onclick="setTab(this)">Photos</button>
+        <button data-tab="people" onclick="setTab(this)">Service People</button>
+      </div>
+
+      <div class="section" data-pane="property">
+        <div id="propertyRows"></div>
+      </div>
+
+      <div class="section hidden" data-pane="renter">
+        <div id="renterRows"></div>
+        <p class="note">All renter details for this property, at hand in one place. (Sample person — fake info only.)</p>
+      </div>
+
+      <div class="section hidden" data-pane="loan">
+        <div id="loanRows"></div>
+        <p class="note">A section dedicated just to this property's loan. (Sample loan — fake info only.)</p>
+      </div>
+
+      <div class="section hidden" data-pane="assets">
+        <div id="assetList"></div>
+        <div class="total"><span>Total asset value</span><span id="assetTotal">$0</span></div>
+        <form onsubmit="addAsset(event)">
+          <input id="aName" placeholder="Appliance / asset name — e.g. Refrigerator" required>
+          <input id="aBrand" placeholder="Brand — e.g. Samsung" required>
+          <input id="aValue" placeholder="Monetary value — e.g. 1800" type="number" min="0" step="1" required>
+          <button class="addbtn" type="submit">+ Add to checkup list</button>
+        </form>
+        <p class="note">Every appliance marked down with its brand and monetary value — the checkup list for this property.</p>
+      </div>
+
+      <div class="section hidden" data-pane="photos">
+        <div class="photos" id="photoGrid"></div>
+        <p class="note">Photos of the entire property taken <b>before</b> it's given to a renter — proof of the state it was in. (Placeholder tiles in this rough draft.)</p>
+      </div>
+
+      <div class="section hidden" data-pane="people">
+        <div id="peopleList"></div>
+        <form onsubmit="addPerson(event)">
+          <input id="pRole" placeholder="Role — e.g. Plumber, Landscaper" required>
+          <input id="pName" placeholder="Name / company" required>
+          <input id="pPhone" placeholder="Phone — e.g. (555) 010-2030">
+          <button class="addbtn" type="submit">+ Add service person</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RENTER SIDE (placeholder — Bori hasn't explained it yet) ============ -->
+  <div id="renterSide" class="hidden">
+    <div class="renter-hero">
+      <div style="font-size:22px;font-weight:900">Your Home</div>
+      <div class="sub" style="color:#cfe6dd">Renter / customer side</div>
+      <p class="note" style="color:#cfe6dd">This side is a placeholder on purpose. Bori will explain the renter side next, and it gets built from his explanation — nothing invented here yet.</p>
+    </div>
+    <div class="section">
+      <div class="row"><span><small>Sample property</small>101 Sample Palms Dr</span><b>Sample</b></div>
+      <div class="row"><span><small>Status</small>Renter view — coming from Bori's walkthrough</span><b>—</b></div>
+    </div>
+  </div>
+
+  <footer>ROUGH DRAFT — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+</div>
+
+<script>
+const PROPERTIES = [
+  { id:1, cls:"p1", addr:"101 Sample Palms Dr", city:"Miami, FL (sample)", type:"Single-family house", beds:3, baths:2, sqft:"1,480", year:2004, lot:"0.18 acre (sample)",
+    renter:{name:"Alex Sample", phone:"(555) 010-1101", email:"alex.sample@example.com", lease:"Jan 1, 2026 – Dec 31, 2026 (sample)", rent:"$2,400 / mo (sample)", occupants:"2 adults, 1 child (sample)"},
+    loan:{lender:"Sample Bank", type:"30-yr fixed (sample)", balance:"$286,000 (sample)", rate:"6.1% (sample)", payment:"$1,732 / mo (sample)", started:"Mar 2021 (sample)"},
+    assets:[["Refrigerator","Samsung",1800],["Stove / Oven","GE",950],["Dishwasher","Bosch",700],["Washer","LG",800],["Dryer","LG",750],["AC Unit","Carrier",4200],["Water Heater","Rheem",900]],
+    photos:["Living room","Kitchen","Main bedroom","Bathroom","Front exterior","Backyard"],
+    people:[["🔧","Plumber","Mike's Sample Plumbing","(555) 010-2030"],["🌿","Landscaper","Green Sample Lawn Co.","(555) 010-3040"],["❄️","AC Tech","Cool Sample Air","(555) 010-4050"]] },
+  { id:2, cls:"p2", addr:"22 Sample Bay Ct", city:"Tampa, FL (sample)", type:"Townhouse", beds:3, baths:2.5, sqft:"1,620", year:2012, lot:"— (sample)",
+    renter:{name:"Jordan Example", phone:"(555) 010-1202", email:"jordan.example@example.com", lease:"Jun 1, 2026 – May 31, 2027 (sample)", rent:"$2,650 / mo (sample)", occupants:"2 adults (sample)"},
+    loan:{lender:"Example Mortgage Co.", type:"30-yr fixed (sample)", balance:"$312,500 (sample)", rate:"5.8% (sample)", payment:"$1,834 / mo (sample)", started:"Jul 2022 (sample)"},
+    assets:[["Refrigerator","Whirlpool",1400],["Stove / Oven","Frigidaire",800],["Dishwasher","GE",620],["Washer","Samsung",780],["Dryer","Samsung",720],["AC Unit","Trane",4600]],
+    photos:["Living room","Kitchen","Bedroom 1","Bedroom 2","Front exterior","Patio"],
+    people:[["🔧","Plumber","Bay Sample Plumbing","(555) 010-2130"],["🌿","Landscaper","SampleScape","(555) 010-3140"]] },
+  { id:3, cls:"p3", addr:"780 Demo Grove Ave, Unit 4", city:"Orlando, FL (sample)", type:"Condo", beds:2, baths:2, sqft:"1,050", year:1998, lot:"— (sample)",
+    renter:{name:"Taylor Demo", phone:"(555) 010-1303", email:"taylor.demo@example.com", lease:"Sep 1, 2026 – Aug 31, 2027 (sample)", rent:"$1,850 / mo (sample)", occupants:"1 adult (sample)"},
+    loan:{lender:"Sample Bank", type:"15-yr fixed (sample)", balance:"$142,000 (sample)", rate:"5.2% (sample)", payment:"$1,140 / mo (sample)", started:"Oct 2019 (sample)"},
+    assets:[["Refrigerator","LG",1250],["Stove / Oven","GE",760],["Dishwasher","Whirlpool",540],["Washer/Dryer Combo","LG",1100],["AC Unit","Goodman",3100]],
+    photos:["Living room","Kitchen","Main bedroom","Bathroom","Balcony","Building exterior"],
+    people:[["🔧","Plumber","Demo Drain Co.","(555) 010-2230"],["🧹","Cleaner (turnover)","Sample Clean Team","(555) 010-3240"]] },
+  { id:4, cls:"p4", addr:"9 Mockingbird Sample Ln", city:"Key West, FL (sample)", type:"Duplex (one side)", beds:2, baths:1, sqft:"920", year:1987, lot:"0.11 acre (sample)",
+    renter:{name:"Casey Mock", phone:"(555) 010-1404", email:"casey.mock@example.com", lease:"Feb 1, 2026 – Jan 31, 2027 (sample)", rent:"$2,100 / mo (sample)", occupants:"2 adults (sample)"},
+    loan:{lender:"Island Sample Lending", type:"30-yr fixed (sample)", balance:"$198,750 (sample)", rate:"6.4% (sample)", payment:"$1,243 / mo (sample)", started:"Jan 2023 (sample)"},
+    assets:[["Refrigerator","Frigidaire",980],["Stove / Oven","Hotpoint",520],["Washer","GE",640],["Dryer","GE",590],["AC Unit (window x2)","Frigidaire",700]],
+    photos:["Living room","Kitchen","Bedroom","Bathroom","Front porch","Side yard"],
+    people:[["🔧","Plumber","Mock Plumbing KW","(555) 010-2330"],["🌿","Landscaper","Palm Sample Care","(555) 010-3340"],["⚡","Electrician","Sample Electric","(555) 010-4350"]] },
+];
+let current = null;
+const money = n => "$" + Number(n).toLocaleString();
+
+function renderList(){
+  document.getElementById('propList').innerHTML = PROPERTIES.map(p=>`
+    <button class="prop" onclick="openProp(${p.id})">
+      <div class="photo ${p.cls}">${p.addr}</div>
+      <div class="pbody">
+        <div class="addr">${p.addr}</div>
+        <div class="meta">${p.city} · ${p.type}</div>
+        <div class="chips">
+          <span class="chip"><b>${p.beds}</b> bed</span><span class="chip"><b>${p.baths}</b> bath</span>
+          <span class="chip"><b>${p.sqft}</b> sq ft</span><span class="chip">Renter: <b>${p.renter.name}</b></span>
+        </div>
+      </div>
+    </button>`).join('');
+  document.getElementById('statCount').textContent = PROPERTIES.length;
+}
+function rows(obj, labels){
+  return labels.map(([k,l])=>`<div class="row"><span><small>${l}</small>${obj[k]}</span></div>`).join('');
+}
+function openProp(id){
+  current = PROPERTIES.find(p=>p.id===id);
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+  const ph = document.getElementById('dPhoto'); ph.className = 'photo ' + current.cls; ph.textContent = current.addr;
+  document.getElementById('dAddr').textContent = current.addr;
+  document.getElementById('dMeta').textContent = current.city + ' · ' + current.type;
+  document.getElementById('propertyRows').innerHTML =
+    rows(current, [['addr','Address'],['city','City'],['type','Type'],['beds','Bedrooms'],['baths','Bathrooms'],['sqft','Sq ft'],['year','Year built'],['lot','Lot']]).replaceAll(current.addr, current.addr);
+  document.getElementById('propertyRows').innerHTML = [
+    ['Address', current.addr],['City', current.city],['Type', current.type],['Bedrooms', current.beds],['Bathrooms', current.baths],['Sq ft', current.sqft],['Year built', current.year],['Lot', current.lot]
+  ].map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+  document.getElementById('renterRows').innerHTML = [
+    ['Renter name', current.renter.name],['Phone', current.renter.phone],['Email', current.renter.email],['Lease', current.renter.lease],['Rent', current.renter.rent],['Occupants', current.renter.occupants]
+  ].map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+  document.getElementById('loanRows').innerHTML = [
+    ['Lender', current.loan.lender],['Loan type', current.loan.type],['Balance', current.loan.balance],['Rate', current.loan.rate],['Monthly payment', current.loan.payment],['Started', current.loan.started]
+  ].map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+  renderAssets(); renderPhotos(); renderPeople();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function renderAssets(){
+  document.getElementById('assetList').innerHTML = current.assets.map(a=>`
+    <div class="asset"><span>${a[0]}<small>${a[1]}</small></span><b>${money(a[2])}</b></div>`).join('');
+  document.getElementById('assetTotal').textContent = money(current.assets.reduce((s,a)=>s+Number(a[2]),0));
+}
+function renderPhotos(){
+  const cls = current.cls;
+  document.getElementById('photoGrid').innerHTML = current.photos.map((name,i)=>`
+    <div class="ph ${cls}" style="filter:hue-rotate(${i*12}deg)">📷 ${name}<br><small>Before move-in</small></div>`).join('');
+}
+function renderPeople(){
+  document.getElementById('peopleList').innerHTML = current.people.map(p=>`
+    <div class="person"><div class="avatar">${p[0]}</div><div>${p[2]}<small>${p[1]} · ${p[3]}</small></div><div class="call">Call</div></div>`).join('');
+}
+function addAsset(e){
+  e.preventDefault();
+  const n=document.getElementById('aName').value.trim(), b=document.getElementById('aBrand').value.trim(), v=Number(document.getElementById('aValue').value);
+  if(!n||!b||!v) return;
+  current.assets.push([n,b,v]); renderAssets(); e.target.reset();
+}
+function addPerson(e){
+  e.preventDefault();
+  const r=document.getElementById('pRole').value.trim(), n=document.getElementById('pName').value.trim(), ph=document.getElementById('pPhone').value.trim()||'—';
+  if(!r||!n) return;
+  current.people.push(['👤', r, n, ph]); renderPeople(); e.target.reset();
+}
+function showList(){
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function setTab(btn){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+  const t = btn.dataset.tab;
+  document.querySelectorAll('[data-pane]').forEach(p=>p.classList.toggle('hidden', p.dataset.pane!==t));
+}
+function setSide(side){
+  document.getElementById('segOwner').classList.toggle('on', side==='owner');
+  document.getElementById('segRenter').classList.toggle('on', side==='renter');
+  document.getElementById('ownerSide').classList.toggle('hidden', side!=='owner');
+  document.getElementById('renterSide').classList.toggle('hidden', side!=='renter');
+}
+renderList();
+</script>
+</body>
+</html>
