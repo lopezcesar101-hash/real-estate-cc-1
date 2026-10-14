@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property Command Center — Rough Draft v9</title>
+<title>Property Command Center — Rough Draft v10</title>
 <style>
   :root, :root[data-theme="A"]{
     --bg:#0B1E1D; --bg2:#0D2624; --card:#14302D; --card2:#1D423C; --line:rgba(255,255,255,.08);
@@ -103,7 +103,7 @@
   <header>
     <div>
       <h1>Property <span>Command Center</span></h1>
-      <div class="sub">Rough draft v9 — every section switchable on/off by the administrator</div>
+      <div class="sub">Rough draft v10 — complete: property tax, owner notes + vacancy mode added</div>
     </div>
     <div class="badge">SAMPLE DATA</div>
   </header>
@@ -157,6 +157,8 @@
             <button onclick="jump('sec-property')">🏠 Property Details</button>
             <button onclick="jump('sec-photos')">📷 Photos</button>
             <button onclick="jump('sec-checklist')">✅ Move In / Out</button>
+            <button onclick="jump('sec-notes')">📝 Owner Notes</button>
+            <button onclick="jump('sec-vacancy')">🔑 Vacancy Mode</button>
           </div>
           <div class="section" id="sec-property">
             <h3>🏠 Property Details</h3>
@@ -184,6 +186,15 @@
               <button class="addbtn" type="submit">＋ Add item to this checklist</button>
             </form>
             <p class="note">Room-by-room check-off that pairs with the before photos. Every item takes its own <b>notes</b> and <b>photos / videos / files</b>, and items can be added or removed right here in the app. In this draft, uploads stay in this session's view — the deployed app stores them with the property.</p>
+          </div>
+          <div class="section" id="sec-notes">
+            <h3>📝 Owner Notes — private</h3>
+            <textarea id="ownerNotes" rows="4" placeholder="Anything only you need to remember about this location — quirks, plans, reminders (sample)" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px;font-family:inherit;font-size:14px;box-sizing:border-box" onchange="saveNotes()"></textarea>
+            <p class="note">Only the owner/administrator sees these — never shown on the renter side. Edits save as you type away from the box (this session, in this draft).</p>
+          </div>
+          <div class="section" id="sec-vacancy">
+            <h3>🔑 Vacancy Mode</h3>
+            <div id="vacancyBody"></div>
           </div>
         </div>
 
@@ -231,6 +242,7 @@
             <button onclick="jump('sec-rent')">💰 Rent Tracker</button>
             <button onclick="jump('sec-loan')">🏦 Loan &amp; Equity</button>
             <button onclick="jump('sec-bills')">🧾 Bills</button>
+            <button onclick="jump('sec-taxprop')">🏛️ Property Tax</button>
           </div>
           <div class="section" id="sec-rent">
             <h3>💰 Rent Tracker</h3>
@@ -255,6 +267,11 @@
               <input id="bDue" placeholder="Due — e.g. 15th of month">
               <button class="addbtn" type="submit">+ Add bill for this property</button>
             </form>
+          </div>
+          <div class="section" id="sec-taxprop">
+            <h3>🏛️ Property Tax — this location</h3>
+            <div id="taxPropRows"></div>
+            <p class="note">The county tax bill for this one location — amount, due date, and paid status, tracked separately from the year-end tax summary. (Sample figures, entered by the owner.)</p>
           </div>
         </div>
 
@@ -387,7 +404,7 @@
     </div>
   </div>
 
-  <footer>ROUGH DRAFT v9 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
+  <footer>ROUGH DRAFT v10 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>Real Estate Command Center concept — Bori</footer>
 </div>
 
 <!-- bottom dock -->
@@ -438,23 +455,23 @@ const EXTRA = {
   1:{purchase:342000, valueNow:415000, balanceNum:286000,
      keys:[["Front door code","4821 (sample)"],["Garage code","9034 (sample)"],["Alarm code","2210 (sample)"],["Lockbox","On front rail — code 7712 (sample)"],["Spare keys","2 sets — owner holds 1 (sample)"]],
      bills:[["HOA",145,"1st of month"],["Water / Sewer",68,"15th of month"],["Pest control",45,"Quarterly"],["Lawn care",120,"Monthly"]],
-     repairs:[["AC capacitor replaced","Cool Sample Air",285,"Aug 2026 (sample)"],["Kitchen faucet cartridge","Mike's Sample Plumbing",160,"May 2026 (sample)"]], tax:[28800,9400]},
+     repairs:[["AC capacitor replaced","Cool Sample Air",285,"Aug 2026 (sample)"],["Kitchen faucet cartridge","Mike's Sample Plumbing",160,"May 2026 (sample)"]], tax:[28800,9400], taxbill:["Miami-Dade County (sample)","Parcel 01-2345-678 (sample)",4850,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"]},
   2:{purchase:385000, valueNow:448000, balanceNum:312500,
      keys:[["Front door code","6110 (sample)"],["Garage code","6111 (sample)"],["Alarm code","— none (sample)"],["Lockbox","Side gate — code 3308 (sample)"],["Spare keys","1 set (sample)"]],
      bills:[["HOA",210,"1st of month"],["Water / Sewer",74,"15th of month"],["Pool service",180,"Monthly"]],
-     repairs:[["Pool pump seal","Sample Pool Tech",340,"Jul 2026 (sample)"]], tax:[31800,11200]},
+     repairs:[["Pool pump seal","Sample Pool Tech",340,"Jul 2026 (sample)"]], tax:[31800,11200], taxbill:["Hillsborough County (sample)","Parcel 02-3456-789 (sample)",5120,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"]},
   3:{purchase:210000, valueNow:265000, balanceNum:142000,
      keys:[["Unit door code","7789 (sample)"],["Building entry","Fob — 2 issued (sample)"],["Alarm code","— none (sample)"],["Mailbox key","Box 4 (sample)"],["Spare keys","1 set (sample)"]],
      bills:[["Condo HOA",265,"1st of month"],["Electric (owner acct)",0,"Tenant pays (sample)"]],
-     repairs:[["Washer/dryer combo belt","Demo Appliance Repair",210,"Sep 2026 (sample)"]], tax:[22200,6800]},
+     repairs:[["Washer/dryer combo belt","Demo Appliance Repair",210,"Sep 2026 (sample)"]], tax:[22200,6800], taxbill:["Orange County (sample)","Parcel 03-4567-890 (sample)",2640,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"]},
   4:{purchase:268000, valueNow:329000, balanceNum:198750,
      keys:[["Front door code","3456 (sample)"],["Side gate","Padlock — code 0917 (sample)"],["Alarm code","5540 (sample)"],["Lockbox","Porch — code 2020 (sample)"],["Spare keys","2 sets (sample)"]],
      bills:[["Water / Sewer",59,"15th of month"],["Pest control",40,"Quarterly"],["Lawn care",95,"Monthly"]],
-     repairs:[["Water heater flush + anode","Mock Plumbing KW",190,"Jun 2026 (sample)"],["Porch railing repair","Sample Handyman",275,"Apr 2026 (sample)"]], tax:[25200,8100]},
+     repairs:[["Water heater flush + anode","Mock Plumbing KW",190,"Jun 2026 (sample)"],["Porch railing repair","Sample Handyman",275,"Apr 2026 (sample)"]], tax:[25200,8100], taxbill:["Monroe County (sample)","Parcel 04-5678-901 (sample)",3310,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"]},
   5:{purchase:255000, valueNow:298000, balanceNum:0,
      keys:[["Front door code","9021 (sample)"],["Lockbox","Front door — code 4455 (sample)"],["Spare keys","2 sets (sample)"]],
      bills:[["Lawn care (while vacant)",0,"As needed (sample)"]],
-     repairs:[["Deep clean + paint touch-up","Sample Clean Team",600,"Sep 2026 (sample)"]], tax:[0,900]},
+     repairs:[["Deep clean + paint touch-up","Sample Clean Team",600,"Sep 2026 (sample)"]], tax:[0,900], taxbill:["Lee County (sample)","Parcel 05-6789-012 (sample)",3980,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"]},
 };
 let current = null;
 let rentPaid = {1:false,2:true,3:false,4:true,5:false};
@@ -538,7 +555,7 @@ function openProp(id){
   document.getElementById('renterRows').innerHTML = current.vacant
     ? kvRows([['Status','No tenant — this location is vacant'],['Asking rent', current.asking],['Next step','List it / schedule tours (sample)']])
     : kvRows([['Tenant name',current.renter.name],['Phone',current.renter.phone],['Email',current.renter.email],['Occupants',current.renter.occupants]]);
-  renderCrm(); renderLease(); renderBg(); renderRent(); renderLoanEquity(); renderBills(); renderDocs(); renderAssets(); renderRepairs(); renderPhotos(); renderPeople(); renderCk(); updateSticky();
+  renderCrm(); renderLease(); renderBg(); renderRent(); renderLoanEquity(); renderBills(); renderPropTax(); renderNotes(); renderVacancy(); renderDocs(); renderAssets(); renderRepairs(); renderPhotos(); renderPeople(); renderCk(); updateSticky();
   document.querySelectorAll('.gtabs button').forEach(b=>b.classList.toggle('on', b.dataset.group==='overview'));
   document.querySelectorAll('[data-gpane]').forEach(p=>p.classList.toggle('hidden', p.dataset.gpane!=='overview'));
   applyPrefs();
@@ -628,6 +645,40 @@ function renderBills(){
   document.getElementById('billTotal').textContent = money(b.reduce((s,x)=>s+Number(x[1]),0)) + ' / mo';
 }
 function addBill(e){ e.preventDefault(); const n=document.getElementById('bName').value.trim(), a=Number(document.getElementById('bAmt').value), d=document.getElementById('bDue').value.trim()||'Monthly'; if(!n||isNaN(a)) return; extra().bills.push([n,a,d]); renderBills(); e.target.reset(); }
+/* --- Property tax (per location) --- */
+function renderPropTax(){
+  const t = extra().taxbill;
+  document.getElementById('taxPropRows').innerHTML = kvRows([['County',t[0]],['Parcel',t[1]],['Annual tax',money(t[2]) + ' / yr (sample)'],['Next due',t[3]],['Status',t[4]],['Assessed value (county)',money(extra().valueNow) + ' (sample)']]);
+}
+/* --- Owner notes (private, per location) --- */
+let notesStore = {1:"Gate sticks when it's humid — lift while you pull (sample). HOA repaint approved for spring — remind the renter before they schedule anything big (sample)."};
+function renderNotes(){ document.getElementById('ownerNotes').value = notesStore[current.id] || ''; }
+function saveNotes(){ notesStore[current.id] = document.getElementById('ownerNotes').value; }
+/* --- Vacancy mode (per location) --- */
+let showingsStore = {5:[["Oct 3, 2026","Toured — liked it, asked about pets (sample)"],["Oct 10, 2026","Toured — no decision yet (sample)"]]};
+function renderVacancy(){
+  const el = document.getElementById('vacancyBody');
+  if(!current.vacant){
+    el.innerHTML = '<div class="row"><span><small>Vacancy Mode</small></span><b>OFF — tenant in place</b></div><p class="note">Vacancy Mode switches on by itself the moment this location empties: days-vacant counter, showings log, and rent-not-collected estimate, all in this spot.</p>';
+    return;
+  }
+  const shows = showingsStore[current.id] || [];
+  el.innerHTML = `
+    <div class="row"><span><small>Vacancy Mode</small></span><b style="color:var(--gold)">ON — this location is empty</b></div>
+    <div class="row"><span><small>On the market since</small></span><b>Sep 20, 2026 (sample)</b></div>
+    <div class="row"><span><small>Days vacant</small></span><b>24 days (sample)</b></div>
+    <div class="row"><span><small>Asking rent</small></span><b>${current.asking}</b></div>
+    <div class="row"><span><small>Rent not collected so far</small></span><b>≈ $1,760 (sample estimate)</b></div>
+    <div class="row"><span><small>Utilities while vacant</small></span><b>Water on (owner) · Electric on (owner) (sample)</b></div>
+    <h4 style="margin:14px 0 4px">Showings log</h4>
+    ${shows.length ? shows.map(s=>`<div class="asset"><span>${s[0]}<small>${s[1]}</small></span></div>`).join('') : '<p class="note">No showings logged yet.</p>'}
+    <form onsubmit="addShowing(event)">
+      <input id="shWhen" placeholder="Showing — e.g. Oct 18, 2026 (sample)">
+      <input id="shNote" placeholder="Outcome — e.g. Toured, very interested" required>
+      <button class="addbtn" type="submit">+ Log a showing</button>
+    </form>`;
+}
+function addShowing(e){ e.preventDefault(); const w=document.getElementById('shWhen').value.trim()||'Oct 2026 (sample)'; const n=document.getElementById('shNote').value.trim(); if(!n) return; (showingsStore[current.id]=showingsStore[current.id]||[]).push([w,n+' (sample)']); renderVacancy(); }
 /* --- Assets & Docs group --- */
 function renderAssets(){
   document.getElementById('assetList').innerHTML = current.assets.map(a=>`<div class="asset"><span>${a[0]}<small>${a[1]}</small></span><b>${money(a[2])}</b></div>`).join('');
@@ -746,9 +797,9 @@ function renderTax(){
 /* ================= PILLARS: customize + accuracy ================= */
 const PREF_DEFS = [
   ['mod-attention','Needs Attention (Overview)'], ['mod-money','Money Dashboard'], ['mod-tax','Year-End Tax Summary'], ['mod-calendar','Calendar'],
-  ['sec-property','Property Details + Keys & Access'], ['sec-photos','Photos — proof of state'], ['sec-checklist','Move In/Out Checklist'],
+  ['sec-property','Property Details + Keys & Access'], ['sec-photos','Photos — proof of state'], ['sec-checklist','Move In/Out Checklist'], ['sec-notes','Owner Notes section'], ['sec-vacancy','Vacancy Mode section'],
   ['sec-renter','Renter contact card'], ['sec-lease','Lease section'], ['sec-background','Tenant Background Check section'], ['sec-people','Service People section'],
-  ['sec-rent','Rent Tracker'], ['sec-loan','Loan + Equity section'], ['sec-bills','Bills section'],
+  ['sec-rent','Rent Tracker'], ['sec-loan','Loan + Equity section'], ['sec-bills','Bills section'], ['sec-taxprop','Property Tax section'],
   ['sec-assets','Assets (appliances)'], ['sec-repairs','Repairs & Maintenance log'], ['sec-docs','Documents section'],
 ];
 let prefs = {};
