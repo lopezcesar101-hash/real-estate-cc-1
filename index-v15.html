@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Helm · Estate Command — Rough Draft v15</title>
+<style>
+  :root, :root[data-theme="A"]{
+    --bg:#f1e9d7; --bg2:#faf5ea; --card:#fffdf6; --card2:#f4ecd8; --line:rgba(122,90,32,.18);
+    --text:#2b2620; --muted:#7d7261; --gold:#b08d57; --teal:#2e7d5a; --acc2:#d9a441; --red:#bf4127;
+    --pos:#2e7d5a; --posbg:#e0eee1; --neg:#bf4127; --negbg:#f9e3da; --mid:#cf7a24; --midbg:#fceed3; --cau:#a8842a; --caubg:#f7efc6;
+    --radius:18px;
+  }
+  :root[data-theme="B"]{ --bg:#eee0c0; --bg2:#f7ecd0; --card:#fdf6df; --card2:#f1e2ba; --line:rgba(110,80,25,.22); --text:#2e2716; --muted:#7a6a45; --gold:#a87f36; --teal:#2e7d5a; --acc2:#cf8a2d; --red:#bf4127; }
+  :root[data-theme="C"]{ --bg:#e7ecda; --bg2:#f5f7ec; --card:#fdfdf3; --card2:#e7ecd6; --line:rgba(80,95,50,.2); --text:#262b1e; --muted:#6f7a5e; --gold:#7d8f4c; --teal:#2e7d5a; --acc2:#d9a441; --red:#bf4127; }
+  :root[data-theme="D"]{ --bg:#efe2cf; --bg2:#faf1e2; --card:#fffaf0; --card2:#f2e4cd; --line:rgba(130,85,40,.2); --text:#2e2418; --muted:#85705c; --gold:#bc743e; --teal:#2e7d5a; --acc2:#d9a441; --red:#b93a26; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(180deg,var(--bg2),var(--bg) 340px);color:var(--text)}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 110px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 4px}
+  h1{font-size:24px;margin:0;line-height:1.15}
+  h1 span{color:var(--gold)}
+  .sub{color:var(--muted);font-size:13px;margin-top:5px}
+  .badge{background:color-mix(in srgb, var(--gold) 16%, transparent);color:var(--gold);border:1px solid var(--gold);font-size:11px;font-weight:700;padding:5px 9px;border-radius:999px;white-space:nowrap}
+  .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:16px 0}
+  .seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:999px;font-size:14px;font-weight:700;cursor:pointer}
+  .seg button.on{background:var(--gold);color:#fff8ea}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:6px 0 14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px 12px}
+  .stat b{font-size:20px;display:block;font-variant-numeric:tabular-nums}
+  .stat small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+  h2{font-size:17px;margin:18px 0 10px}
+  .section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px;margin-top:12px;scroll-margin-top:76px}
+  .section h3{margin:0 0 8px;font-size:16px}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .row:last-child{border-bottom:0}
+  .row small{color:var(--muted);display:block;font-size:12px}
+  .row b{text-align:right}
+  .asset{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+  .asset:last-child{border-bottom:0}
+  .asset small{color:var(--muted);display:block}
+  .total{display:flex;justify-content:space-between;font-weight:900;font-size:16px;padding-top:12px}
+  .total span:last-child{color:var(--gold)}
+  .note{color:var(--muted);font-size:12px;line-height:1.5;margin-top:10px}
+  .hidden{display:none!important}
+  /* property cards */
+  .prop{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:16px;cursor:pointer;text-align:left;width:100%;color:var(--text);padding:0;box-shadow:0 10px 24px rgba(96,76,44,.20)}
+  .prop:active{transform:scale(.99)}
+  .photo{height:134px;display:flex;align-items:flex-end;padding:13px;font-weight:800;font-size:15.5px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+  .p1{background:linear-gradient(135deg,#7d8a4e,#4c5a2c 60%,#37431f)}
+  .p2{background:linear-gradient(135deg,#b98c46,#7d5a1e 60%,#5a4214)}
+  .p3{background:linear-gradient(135deg,#8a7a5c,#5c4f38 60%,#423825)}
+  .p4{background:linear-gradient(135deg,#c08356,#8a5630 60%,#653d20)}
+  .pbody{padding:13px 14px 15px}
+  .pbody .addr{font-weight:800;font-size:16px}
+  .pbody .meta{color:var(--muted);font-size:13px;margin-top:3px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:5px 9px;border-radius:999px}
+  .chip b{color:var(--text)}
+  /* bottom dock — the app's main tabs */
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:50;background:color-mix(in srgb, var(--card) 94%, transparent);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+  .dock-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+  .prop.vacant{border:2px dashed #9aa1ab;background:repeating-linear-gradient(135deg,rgba(70,70,70,.05) 0 12px,transparent 12px 24px),#e8e5de;box-shadow:none;filter:saturate(.25)}
+  .prop.vacant .photo{position:relative;overflow:hidden;filter:grayscale(1) brightness(.95) contrast(.92);opacity:1}
+  .prop.vacant .photo::after{content:"VACANT";position:absolute;right:-36px;top:17px;transform:rotate(35deg);background:#050607;color:#fff;border:1px solid rgba(255,255,255,.68);padding:6px 44px;font-size:13px;letter-spacing:3px;font-weight:900;text-shadow:none;box-shadow:0 3px 10px rgba(0,0,0,.55)}
+  .prop.vacant .pbody{opacity:.78;filter:grayscale(.65)}
+  .vacant-flag{display:flex;align-items:center;justify-content:center;gap:8px;background:repeating-linear-gradient(135deg,#26282c 0 14px,#111214 14px 28px);color:#f2f2f2;border-bottom:2px dashed #9aa1ab;padding:10px 8px;font-size:13px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}
+  .status-vacant{background:#050607!important;border:1px solid rgba(255,255,255,.72)!important;color:#fff!important}
+  .vacant-hero{margin-top:12px;background:repeating-linear-gradient(135deg,#26282c 0 14px,#111214 14px 28px);border:2px dashed #9aa1ab;border-radius:16px;color:#fff;padding:14px;text-align:center;font-weight:900;letter-spacing:1.4px;text-transform:uppercase}
+  .vacant-hero span{display:block;margin-top:5px;font-size:12px;letter-spacing:.2px;text-transform:none;font-weight:700;color:#d7d7d7}
+  .repbtn{flex:1;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px 6px;font-weight:800;font-size:13px;cursor:pointer}
+  .repbtn-wide{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer}
+  .report-opts-panel{margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:6px 12px 12px;background:var(--card);text-align:left}
+  .rogroup{font-weight:800;font-size:12.5px;letter-spacing:.4px;margin:10px 0 2px;color:var(--gold)}
+  .roitem{display:flex;gap:9px;align-items:center;font-size:14px;padding:5px 0;cursor:pointer}
+  .roitem input{width:18px;height:18px;accent-color:var(--teal)}
+  .ropresets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .ropreset{flex:1;padding:8px 6px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .prop.selected{outline:3px solid var(--gold);outline-offset:2px}
+  .dock button{border:0;background:transparent;color:var(--muted);font-size:11px;font-weight:700;padding:7px 2px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .dock button .ic{font-size:20px;line-height:1}
+  .dock button.on{color:var(--gold);background:var(--card2)}
+  /* detail group tabs + index */
+  .back{border:0;background:var(--card);color:var(--text);border:1px solid var(--line);padding:9px 13px;border-radius:999px;font-weight:700;cursor:pointer;margin-bottom:12px}
+  .gtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0 2px}
+  .gtabs button{border:1px solid var(--line);background:var(--card);color:var(--muted);padding:11px 4px;border-radius:14px;font-weight:800;font-size:12.5px;cursor:pointer}
+  .gtabs button.on{background:var(--gold);color:#fff8ea;border-color:transparent}
+  .index{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 2px}
+  .index button{border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:12px;font-weight:700;padding:7px 11px;border-radius:999px;cursor:pointer}
+  .stickybar{position:sticky;top:8px;z-index:5;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;box-shadow:0 6px 18px rgba(96,76,44,.25)}
+  .photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ph{height:96px;border-radius:14px;display:flex;align-items:flex-end;padding:9px;font-size:12px;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,.6);border:1px solid var(--line)}
+  .person{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .person:last-child{border-bottom:0}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+  .person small{color:var(--muted);display:block;font-size:12px}
+  .person .call{margin-left:auto;color:var(--teal);font-weight:800;font-size:13px;white-space:nowrap;text-decoration:none}
+  form{display:grid;gap:9px;margin-top:12px}
+  input,select{background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px 12px;font-size:14px;width:100%}
+  .addbtn{background:var(--gold);color:#fff8ea;border:0;border-radius:12px;padding:12px;font-weight:900;font-size:14px;cursor:pointer}
+  .qa{display:flex;gap:8px;margin-top:12px}
+  .qa a{flex:1;text-align:center;font-weight:900;padding:11px;border-radius:12px;text-decoration:none;font-size:14px}
+  .renter-hero{background:linear-gradient(135deg,#f4ecd8,#e7d9b4);border:1px solid var(--line);border-radius:22px;padding:18px}
+  footer{color:var(--muted);font-size:11px;text-align:center;margin-top:28px;line-height:1.6}
+  .bar-row{display:flex;align-items:center;gap:8px;font-size:13px}
+  .bar-track{flex:1;background:var(--bg);border-radius:6px;height:10px}
+  .bar-fill{height:100%;background:var(--teal);border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="display:flex;gap:11px;align-items:center">
+      <svg width="44" height="44" viewBox="0 0 100 100"  aria-label="The Helm logo"><defs><radialGradient id="hg1" cx="0.38" cy="0.34" r="0.9"><stop offset="0" stop-color="#fff6c4"/><stop offset="0.45" stop-color="#e9c860"/><stop offset="0.8" stop-color="#b98c2e"/><stop offset="1" stop-color="#7a5a18"/></radialGradient></defs><g transform="translate(1.5 2.5)" opacity="0.16"><g stroke="#000" stroke-width="5.2" stroke-linecap="round" fill="none"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g></g><g stroke-linecap="round" fill="none"><g stroke="#14100a" stroke-width="5.2"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g><g stroke="#d9b45c" stroke-width="3.1"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g><g stroke="#2e2106" stroke-width="0.7" opacity="0.5"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g></g><circle cx="50" cy="12" r="4.5" fill="#14100a"/><circle cx="50" cy="88" r="4.5" fill="#14100a"/><circle cx="12" cy="50" r="4.5" fill="#14100a"/><circle cx="88" cy="50" r="4.5" fill="#14100a"/><circle cx="23" cy="23" r="4.5" fill="#14100a"/><circle cx="77" cy="77" r="4.5" fill="#14100a"/><circle cx="77" cy="23" r="4.5" fill="#14100a"/><circle cx="23" cy="77" r="4.5" fill="#14100a"/><circle cx="50" cy="12" r="3.4" fill="url(#hg1)"/><circle cx="50" cy="88" r="3.4" fill="url(#hg1)"/><circle cx="12" cy="50" r="3.4" fill="url(#hg1)"/><circle cx="88" cy="50" r="3.4" fill="url(#hg1)"/><circle cx="23" cy="23" r="3.4" fill="url(#hg1)"/><circle cx="77" cy="77" r="3.4" fill="url(#hg1)"/><circle cx="77" cy="23" r="3.4" fill="url(#hg1)"/><circle cx="23" cy="77" r="3.4" fill="url(#hg1)"/><circle cx="50" cy="50" r="11" fill="#14100a"/><circle cx="50" cy="50" r="9.4" fill="url(#hg1)"/><circle cx="50" cy="47.4" r="2.6" fill="#14100a"/><path d="M50 49.2 L52.3 54.8 L47.7 54.8 Z" fill="#14100a"/></svg>
+      <div>
+        <h1>THE <span>HELM</span></h1>
+        <div class="sub">Estate Command · Rough draft v15 · ivory theme + meaning colors</div>
+      </div>
+    </div>
+    <div class="badge">SAMPLE DATA</div>
+  </header>
+
+  <div class="seg" role="tablist">
+    <button id="segOwner" class="on" onclick="setSide('owner')">Owner Side</button>
+    <button id="segRenter" onclick="setSide('renter')">Renter Side</button>
+  </div>
+
+  <div id="ownerSide">
+    <!-- ================= PAGE: HOME ================= -->
+    <div data-page="home">
+      <div style="font-size:11px;letter-spacing:2.2px;font-weight:800;color:var(--gold);margin:2px 0 2px">⚓ THE HELM — EVERY PROPERTY IN FULL VIEW</div>
+      <h2 style="margin-top:4px">📍 Your locations</h2>
+      <p class="note" style="margin:0 0 10px;font-size:13px">Your whole portfolio, calm and at a glance. Tap any location to open it — everything about it lives inside, organized and labeled.</p>
+      <input id="propSearch" placeholder="🔎 Find a location — address, city, or tenant name" oninput="renderList()">
+      <div class="report-ui" style="margin-top:10px">
+        <button class="repbtn-wide" id="reportModeBtn" onclick="toggleReportMode()">🧾 Create location reports — pick one or many</button>
+        <div id="bulkBar" class="hidden" style="margin-top:8px">
+          <p class="note" id="bulkCount" style="margin:0 0 8px">Tap locations to select them. You get <b>one complete file per location</b> — every detail, note, picture, and history it has.</p>
+          <button class="repbtn-wide" style="margin:0 0 8px" onclick="toggleReportOpts('reportOptsBulk')">⚙ Choose what's in the reports</button>
+          <div id="reportOptsBulk" class="report-opts-panel" data-where="bulk" style="display:none;margin-bottom:8px"></div>
+          <div style="display:flex;gap:8px">
+            <button class="addbtn" style="flex:1" onclick="generateSelectedReports()">⬇ Generate selected reports</button>
+            <button class="repbtn" style="flex:0 0 84px" onclick="toggleReportMode()">Done</button>
+          </div>
+        </div>
+      </div>
+      <div id="propList" style="margin-top:12px"></div>
+      <p class="note">Lively color = a tenant lives there now. An unoccupied location is unmistakable: dark, desaturated, dashed outline, and a bold <b>VACANT — NO TENANT</b> banner — but <b>still fully functional</b>: tap it and everything opens the same.</p>
+      <div style="font-weight:800;font-size:13px;margin:20px 0 6px;color:var(--muted)">PORTFOLIO SNAPSHOT</div>
+      <div class="stats">
+        <div class="stat"><b id="statCount">5</b><small>Locations</small></div>
+        <div class="stat"><b>$9,000</b><small>Rent in / mo</small></div>
+        <div class="stat"><b>$1,750</b><small>Net / mo (sample)</small></div>
+      </div>
+      <div class="section" id="mod-attention" style="margin-top:12px">
+        <h3>🔔 Needs Attention</h3>
+        <div id="attentionList"></div>
+        <p class="note">A quiet snapshot — at most 3 things, most urgent first. Empty means "All clear." The automation watches this so you don't have to.</p>
+      </div>
+    </div>
+
+    <!-- ================= LOCATION FULL PAGE ================= -->
+      <div id="detailView" class="hidden">
+        <div class="stickybar">
+          <b id="sbAddr" style="font-size:14px">Property</b>
+          <span id="sbRent" class="chip"></span>
+        </div>
+        <button class="back" onclick="showList()">← Overview — all locations</button>
+        <div class="photo p1" id="dPhoto" style="border-radius:18px;height:110px"></div>
+        <h2 id="dAddr" style="font-size:20px;margin-bottom:2px"></h2>
+        <div class="sub" id="dMeta"></div>
+        <div id="vacantHero" class="vacant-hero hidden">⛔ Vacant — no tenant here<span>Not earning rent · Still fully open and manageable</span></div>
+        <div class="report-ui" style="margin-top:12px">
+          <div style="display:flex;gap:8px">
+            <button class="repbtn" onclick="printReport()">🖨 Print report</button>
+            <button class="repbtn" onclick="downloadReport(current.id)">⬇ Download file</button>
+            <button class="repbtn" onclick="emailReport()">✉ Email</button>
+          </div>
+          <button class="repbtn-wide" style="margin-top:8px" onclick="toggleReportOpts('reportOptsLoc')">⚙ Choose what's in the report</button>
+          <div id="reportOptsLoc" class="report-opts-panel" data-where="loc" style="display:none"></div>
+        </div>
+
+        <div class="gtabs">
+          <button class="on" data-group="overview" onclick="setGroup(this)">🏠<br>Overview</button>
+          <button data-group="people" onclick="setGroup(this)">👤<br>Renter &amp; Lease</button>
+          <button data-group="money" onclick="setGroup(this)">💵<br>Money</button>
+          <button data-group="assets" onclick="setGroup(this)">🧰<br>Assets &amp; Docs</button>
+        </div>
+
+        <!-- GROUP: OVERVIEW -->
+        <div data-gpane="overview">
+          <div class="index">
+            <button onclick="jump('sec-property')">🏠 Property Details</button>
+            <button onclick="jump('sec-photos')">📷 Photos</button>
+            <button onclick="jump('sec-checklist')">✅ Move In / Out</button>
+            <button onclick="jump('sec-notes')">📝 Owner Notes</button>
+            <button onclick="jump('sec-vacancy')">🔑 Vacancy Mode</button>
+          </div>
+          <div class="section" id="sec-property">
+            <h3>🏠 Property Details</h3>
+            <div id="propertyRows"></div>
+            <h4 style="margin:16px 0 4px">🔑 Keys &amp; Access — owner only</h4>
+            <div id="keysRows"></div>
+            <p class="note">Keys &amp; access lives inside the property details (Bori's placement).</p>
+          </div>
+          <div class="section" id="sec-photos">
+            <h3>📷 Photos — proof of state</h3>
+            <div class="photos" id="photoGrid"></div>
+            <p class="note">Photos of the entire property taken <b>before</b> it's given to a renter — proof of the state it was in. (Placeholder tiles in this rough draft.)</p>
+          </div>
+          <div class="section" id="sec-checklist">
+            <h3>✅ Move-In / Move-Out Checklist</h3>
+            <div class="seg" style="margin:0 0 10px">
+              <button id="ckIn" class="on" onclick="setCkMode('in')">Move-In</button>
+              <button id="ckOut" onclick="setCkMode('out')">Move-Out</button>
+            </div>
+            <div style="background:var(--bg);border-radius:999px;height:10px;overflow:hidden"><div id="ckBar" style="height:100%;width:0%;background:var(--teal);transition:width .3s"></div></div>
+            <div class="note" id="ckPct" style="margin:6px 0 4px">0% checked</div>
+            <div id="ckList"></div>
+            <form onsubmit="addCkItem(event)" style="margin-top:12px">
+              <input id="ckNewItem" placeholder="New checklist item — e.g. Garage door opener (sample)">
+              <button class="addbtn" type="submit">＋ Add item to this checklist</button>
+            </form>
+            <p class="note">Room-by-room check-off that pairs with the before photos. Every item takes its own <b>notes</b> and <b>photos / videos / files</b>, and items can be added or removed right here in the app. In this draft, uploads stay in this session's view — the deployed app stores them with the property.</p>
+          </div>
+          <div class="section" id="sec-notes">
+            <h3>📝 Owner Notes — private</h3>
+            <textarea id="ownerNotes" rows="4" placeholder="Anything only you need to remember about this location — quirks, plans, reminders (sample)" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px;font-family:inherit;font-size:14px;box-sizing:border-box" onchange="saveNotes()"></textarea>
+            <p class="note">Only the owner/administrator sees these — never shown on the renter side. Edits save as you type away from the box (this session, in this draft).</p>
+          </div>
+          <div class="section" id="sec-vacancy">
+            <h3>🔑 Vacancy Mode</h3>
+            <div id="vacancyBody"></div>
+          </div>
+        </div>
+
+        <!-- GROUP: RENTER & LEASE -->
+        <div data-gpane="people" class="hidden">
+          <div class="index">
+            <button onclick="jump('sec-renter')">👤 Renter</button>
+            <button onclick="jump('sec-lease')">📄 Lease</button>
+            <button onclick="jump('sec-background')">🔍 Background Check</button>
+            <button onclick="jump('sec-people')">🔧 Service People</button>
+          </div>
+          <div class="section" id="sec-renter">
+            <h3>👤 Renter — contact card</h3>
+            <div id="renterRows"></div>
+            <div id="crmCard"></div>
+            <p class="note">Everything about this renter in one place — the CRM pattern from the study. (Sample person — fake info only.)</p>
+          </div>
+          <div class="section" id="sec-lease">
+            <h3>📄 Lease</h3>
+            <div id="leaseRows"></div>
+            <p class="note">The lease for this property, stored here with its dates and deposit.</p>
+          </div>
+          <div class="section" id="sec-background">
+            <h3>🔍 Tenant Background Check</h3>
+            <div id="bgRows"></div>
+            <div id="bgList" style="margin-top:6px"></div>
+            <label class="addbtn" style="display:block;text-align:center;cursor:pointer;margin-top:10px">📎 Upload background check<input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" style="display:none" onchange="addBgFiles(this)"></label>
+            <p class="note">For this location's tenant — only if a background check was required and performed. This whole section can be turned off (or back on) any time in <b>More → Customize</b> — the administrator decides. In this draft, uploads stay in this session's view; the deployed app stores them securely with the location.</p>
+          </div>
+          <div class="section" id="sec-people">
+            <h3>🔧 Service People</h3>
+            <div id="peopleList"></div>
+            <form onsubmit="addPerson(event)">
+              <input id="pRole" placeholder="Role — e.g. Plumber, Landscaper" required>
+              <input id="pName" placeholder="Name / company" required>
+              <input id="pPhone" placeholder="Phone — e.g. (555) 010-2030">
+              <button class="addbtn" type="submit">+ Add service person</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- GROUP: MONEY -->
+        <div data-gpane="money" class="hidden">
+          <div class="index">
+            <button onclick="jump('sec-rent')">💰 Rent Tracker</button>
+            <button onclick="jump('sec-loan')">🏦 Loan &amp; Equity</button>
+            <button onclick="jump('sec-bills')">🧾 Bills</button>
+            <button onclick="jump('sec-taxprop')">🏛️ Property Tax</button>
+          </div>
+          <div class="section" id="sec-rent">
+            <h3>💰 Rent Tracker</h3>
+            <div id="rentNow"></div>
+            <h4 style="margin:14px 0 4px">Payment history</h4>
+            <div id="rentHistory"></div>
+          </div>
+          <div class="section" id="sec-loan">
+            <h3>🏦 Loan — dedicated section</h3>
+            <div id="loanRows"></div>
+            <h4 style="margin:16px 0 4px">💰 Equity Tracker</h4>
+            <div id="equityRows"></div>
+            <p class="note">Equity = worth now − loan balance. In the deployed app this pulls <b>real bank and loan data</b> (Bori's plan) — sample numbers until then.</p>
+          </div>
+          <div class="section" id="sec-bills">
+            <h3>🧾 Bills — this property</h3>
+            <div id="billList"></div>
+            <div class="total"><span>Total monthly bills</span><span id="billTotal">$0</span></div>
+            <form onsubmit="addBill(event)">
+              <input id="bName" placeholder="Bill — e.g. HOA, Water, Insurance" required>
+              <input id="bAmt" placeholder="Amount — e.g. 145" type="number" min="0" step="0.01" required>
+              <input id="bDue" placeholder="Due — e.g. 15th of month">
+              <button class="addbtn" type="submit">+ Add bill for this property</button>
+            </form>
+          </div>
+          <div class="section" id="sec-taxprop">
+            <h3>🏛️ Property Tax — this location</h3>
+            <div id="taxPropRows"></div>
+            <p class="note">The county tax bill for this one location — amount, due date, and paid status, tracked separately from the year-end tax summary. (Sample figures, entered by the owner.)</p>
+          </div>
+        </div>
+
+        <!-- GROUP: ASSETS & DOCS -->
+        <div data-gpane="assets" class="hidden">
+          <div class="index">
+            <button onclick="jump('sec-assets')">🧰 Asset Checkup</button>
+            <button onclick="jump('sec-repairs')">🛠️ Repairs</button>
+            <button onclick="jump('sec-docs')">🗂️ Documents</button>
+          </div>
+          <div class="section" id="sec-assets">
+            <h3>🧰 Asset Checkup List</h3>
+            <div id="assetList"></div>
+            <div class="total"><span>Total asset value</span><span id="assetTotal">$0</span></div>
+            <form onsubmit="addAsset(event)">
+              <input id="aName" placeholder="Appliance / asset name — e.g. Refrigerator" required>
+              <input id="aBrand" placeholder="Brand — e.g. Samsung" required>
+              <input id="aValue" placeholder="Monetary value — e.g. 1800" type="number" min="0" step="1" required>
+              <button class="addbtn" type="submit">+ Add to checkup list</button>
+            </form>
+          </div>
+          <div class="section" id="sec-repairs">
+            <h3>🛠️ Repairs &amp; Maintenance — connected to Assets</h3>
+            <div id="repairList"></div>
+            <form onsubmit="addRepair(event)">
+              <input id="rWhat" placeholder="What was repaired — e.g. AC compressor" required>
+              <input id="rWho" placeholder="Who fixed it — e.g. Cool Sample Air">
+              <input id="rCost" placeholder="Cost — e.g. 450" type="number" min="0" step="1">
+              <button class="addbtn" type="submit">+ Log repair</button>
+            </form>
+            <p class="note">Repairs live connected to the Assets portion (Bori's placement).</p>
+          </div>
+          <div class="section" id="sec-docs">
+            <h3>🗂️ Documents Vault — this property</h3>
+            <input id="docSearch" placeholder="🔎 Search documents — try &quot;insurance&quot; or &quot;lease&quot;" oninput="renderDocs()">
+            <div class="chips" style="margin:10px 0 4px">
+              <button class="chip" style="cursor:pointer" onclick="setDocCat('All')">All</button>
+              <button class="chip" style="cursor:pointer" onclick="setDocCat('Insurance')">Insurance</button>
+              <button class="chip" style="cursor:pointer" onclick="setDocCat('Lease')">Lease</button>
+              <button class="chip" style="cursor:pointer" onclick="setDocCat('Tax')">Tax</button>
+              <button class="chip" style="cursor:pointer" onclick="setDocCat('Loan')">Loan</button>
+              <button class="chip" style="cursor:pointer" onclick="setDocCat('Ownership')">Ownership</button>
+            </div>
+            <div id="docList"></div>
+            <p class="note">Organized by category, with search to retrieve anything fast. <b>Insurance lives in this section</b> (Bori's placement).</p>
+          </div>
+        </div>
+      </div>
+
+    <!-- ================= PAGE: MONEY ================= -->
+    <div data-page="money" class="hidden">
+      <div class="section" id="mod-money" style="margin-top:2px">
+        <h3>💵 Money Dashboard — whole portfolio</h3>
+        <p style="margin:0 0 6px;font-size:15px;line-height:1.45">You keep <b>$1,750</b> this month after loans and bills — <b>up $140 vs last month</b>, mostly because repairs were lower. <span style="color:var(--muted);font-size:12px">(Plain-language insight first — Apple Health / Airbnb pattern, sample.)</span></p>
+        <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:8px 0 2px">
+          <div><small style="color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-size:11px">Net this month</small><div style="font-size:38px;font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums">$1,750</div></div>
+          <span class="chip" style="color:var(--teal);font-weight:800">▲ $140 vs Sep (sample)</span>
+        </div>
+        <svg viewBox="0 0 260 56" width="100%" height="56" preserveAspectRatio="none" aria-label="Net trend sparkline">
+          <polyline points="0,40 52,30 104,34 156,22 208,30 260,14" fill="none" stroke="var(--acc2)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="260" cy="14" r="3.5" fill="var(--acc2)"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:11px"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
+        <div class="row" style="margin-top:8px"><span><small>Rent coming in</small></span><b style="color:var(--teal)" id="mdRent">$9,000 / mo</b></div>
+        <div class="row"><span><small>Loan payments + property bills</small></span><b style="color:var(--red)" id="mdCosts">$7,250 / mo</b></div>
+        <div class="total"><span>Net (sample)</span><span id="mdNet">$1,750 / mo</span></div>
+        <div id="dataCheck" style="margin-top:10px;font-size:13px;font-weight:700"></div>
+        <h4 style="margin:16px 0 6px">Rent by property — ranked (sample)</h4>
+        <div style="display:grid;gap:7px">
+          <div class="bar-row"><span style="width:118px;color:var(--muted)">22 Sample Bay Ct</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><b>$2,650</b></div>
+          <div class="bar-row"><span style="width:118px;color:var(--muted)">101 Sample Palms</span><div class="bar-track"><div class="bar-fill" style="width:91%"></div></div><b>$2,400</b></div>
+          <div class="bar-row"><span style="width:118px;color:var(--muted)">9 Mockingbird Ln</span><div class="bar-track"><div class="bar-fill" style="width:79%"></div></div><b>$2,100</b></div>
+          <div class="bar-row"><span style="width:118px;color:var(--muted)">780 Demo Grove</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><b>$1,850</b></div>
+        </div>
+        <p class="note" style="border-top:1px solid var(--line);padding-top:10px"><b>🛡️ Accuracy Protocol — Pillar 2:</b> automated data is double-checked before it's displayed, and any contradiction gets <b>flagged before you see it</b> — never passed along silently. Data you type in yourself is confirmed by you; the protocol covers the automated numbers.</p>
+      </div>
+      <div class="section" id="mod-tax">
+        <h3>🧾 Year-End Tax Summary — 2026 (sample)</h3>
+        <div id="taxRows"></div>
+        <div class="total"><span>Net for the year (sample)</span><span id="taxNet">$0</span></div>
+        <p class="note">Income vs expenses per property for the year, ready to hand to an accountant. Sample figures only — not a tax filing.</p>
+      </div>
+    </div>
+
+    <!-- ================= PAGE: CALENDAR ================= -->
+    <div data-page="calendar" class="hidden">
+      <div class="section" id="mod-calendar" style="margin-top:2px">
+        <h3>📅 Calendar — October 2026 (sample)</h3>
+        <div class="note" style="margin:0 0 10px">Tap a day to see what's due. Add your own reminder below. <b>The plan:</b> when the app is deployed, this connects to your actual email and Google Calendar — interactive mock until then (Bori's plan).</div>
+        <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"></div>
+        <div id="calEvents" style="margin-top:10px"></div>
+        <form onsubmit="addEvent(event)">
+          <input id="eDay" type="number" min="1" max="31" placeholder="Day of month — e.g. 20" required>
+          <input id="eTitle" placeholder="Reminder — e.g. Lease ends: 101 Sample Palms" required>
+          <button class="addbtn" type="submit">+ Add reminder</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================= PAGE: MORE ================= -->
+    <div data-page="more" class="hidden">
+      <div class="section" style="margin-top:2px">
+        <h3>⚙️ Customize My View — Pillar 1</h3>
+        <p class="note" style="margin:0 0 8px">Anything here can be dropped just as easily as it was added. Flip a switch: it disappears — section <i>and</i> its index shortcut. Flip it back: it's back. Nothing forced. <b>Every section in the app has a switch here</b> — that's how the administrator shapes the app to each customer.</p>
+        <div style="font-weight:800;font-size:13px;margin-top:8px">Sections — all of them</div>
+        <div id="prefList"></div>
+        <div style="font-weight:800;font-size:13px;margin-top:12px">Color theme — vivid, easy on the eyes</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <button onclick="setTheme('A')" style="border:1px solid var(--line);background:#fffdf6;color:#2b2620;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">☀️ A · Ivory Helm<br><small style="color:#b08d57">soft ivory + brass</small></button>
+          <button onclick="setTheme('B')" style="border:1px solid var(--line);background:#fdf6df;color:#2e2716;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">📜 B · Parchment<br><small style="color:#a87f36">deeper warm ivory</small></button>
+          <button onclick="setTheme('C')" style="border:1px solid var(--line);background:#fdfdf3;color:#262b1e;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">🌿 C · Sage Ivory<br><small style="color:#7d8f4c">ivory + sage green</small></button>
+          <button onclick="setTheme('D')" style="border:1px solid var(--line);background:#fffaf0;color:#2e2418;border-radius:12px;padding:10px;font-weight:800;cursor:pointer">🏺 D · Sand & Clay<br><small style="color:#bc743e">sand + clay accents</small></button>
+        </div>
+        <p class="note">Four palettes from the study — all dark and tinted, one vivid accent each. Your pick sticks on this phone.</p>
+      </div>
+      <div class="section">
+        <h3>📌 The two pillars</h3>
+        <p class="note" style="margin-top:0"><b>Pillar 1 — Display + customization:</b> the info you want, shown effectively, most important first — and every piece can be dropped as easily as it was added.</p>
+        <p class="note"><b>Pillar 2 — Accuracy protocol:</b> automated numbers are double-checked before display; contradictions are flagged, never passed on silently. What you enter yourself, you confirm yourself.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RENTER SIDE (placeholder) ================= -->
+  <div id="renterSide" class="hidden">
+    <div class="renter-hero">
+      <div style="font-size:22px;font-weight:900">Your Home</div>
+      <div class="sub" style="color:#cfe6dd">Renter / customer side</div>
+      <p class="note" style="color:#cfe6dd">This side is a placeholder on purpose. Bori will explain the renter side next, and it gets built from his explanation — nothing invented here yet.</p>
+    </div>
+  </div>
+
+  <footer>ROUGH DRAFT v15 — ALL MOCK / FAKE INFO ONLY<br>No real properties, renters, loans, or people.<br>THE HELM · ESTATE COMMAND — Bori’s brand · Logo LOCKED Oct 14, 2026 · Concept — Bori</footer>
+</div>
+
+<!-- bottom dock -->
+<nav class="dock" id="dock">
+  <div class="dock-in">
+    <button class="on" data-dock="home" onclick="goPage('home')"><span class="ic">🏠</span>Overview</button>
+    <button data-dock="money" onclick="goPage('money')"><span class="ic">💵</span>Money</button>
+    <button data-dock="calendar" onclick="goPage('calendar')"><span class="ic">📅</span>Calendar</button>
+    <button data-dock="more" onclick="goPage('more')"><span class="ic">⚙️</span>More</button>
+  </div>
+</nav>
+
+<script>
+/* ================= DATA — all mock / fake (Bori, Oct 14) ================= */
+const PROPERTIES = [
+  { id:1, cls:"p1", addr:"101 Sample Palms Dr", city:"Miami, FL (sample)", type:"Single-family house", beds:3, baths:2, sqft:"1,480", year:2004, lot:"0.18 acre (sample)",
+    renter:{name:"Alex Sample", phone:"(555) 010-1101", email:"alex.sample@example.com", lease:"Jan 1, 2026 – Dec 31, 2026 (sample)", rent:"$2,400 / mo (sample)", occupants:"2 adults, 1 child (sample)"},
+    loan:{lender:"Sample Bank", type:"30-yr fixed (sample)", balance:"$286,000 (sample)", rate:"6.1% (sample)", payment:"$1,732 / mo (sample)", started:"Mar 2021 (sample)"},
+    assets:[["Refrigerator","Samsung",1800],["Stove / Oven","GE",950],["Dishwasher","Bosch",700],["Washer","LG",800],["Dryer","LG",750],["AC Unit","Carrier",4200],["Water Heater","Rheem",900]],
+    photos:["Living room","Kitchen","Main bedroom","Bathroom","Front exterior","Backyard"],
+    people:[["🔧","Plumber","Mike's Sample Plumbing","(555) 010-2030"],["🌿","Landscaper","Green Sample Lawn Co.","(555) 010-3040"],["❄️","AC Tech","Cool Sample Air","(555) 010-4050"]] },
+  { id:2, cls:"p2", addr:"22 Sample Bay Ct", city:"Tampa, FL (sample)", type:"Townhouse", beds:3, baths:2.5, sqft:"1,620", year:2012, lot:"— (sample)",
+    renter:{name:"Jordan Example", phone:"(555) 010-1202", email:"jordan.example@example.com", lease:"Jun 1, 2026 – May 31, 2027 (sample)", rent:"$2,650 / mo (sample)", occupants:"2 adults (sample)"},
+    loan:{lender:"Example Mortgage Co.", type:"30-yr fixed (sample)", balance:"$312,500 (sample)", rate:"5.8% (sample)", payment:"$1,834 / mo (sample)", started:"Jul 2022 (sample)"},
+    assets:[["Refrigerator","Whirlpool",1400],["Stove / Oven","Frigidaire",800],["Dishwasher","GE",620],["Washer","Samsung",780],["Dryer","Samsung",720],["AC Unit","Trane",4600]],
+    photos:["Living room","Kitchen","Bedroom 1","Bedroom 2","Front exterior","Patio"],
+    people:[["🔧","Plumber","Bay Sample Plumbing","(555) 010-2130"],["🌿","Landscaper","SampleScape","(555) 010-3140"]] },
+  { id:3, cls:"p3", addr:"780 Demo Grove Ave, Unit 4", city:"Orlando, FL (sample)", type:"Condo", beds:2, baths:2, sqft:"1,050", year:1998, lot:"— (sample)",
+    renter:{name:"Taylor Demo", phone:"(555) 010-1303", email:"taylor.demo@example.com", lease:"Sep 1, 2026 – Aug 31, 2027 (sample)", rent:"$1,850 / mo (sample)", occupants:"1 adult (sample)"},
+    loan:{lender:"Sample Bank", type:"15-yr fixed (sample)", balance:"$142,000 (sample)", rate:"5.2% (sample)", payment:"$1,140 / mo (sample)", started:"Oct 2019 (sample)"},
+    assets:[["Refrigerator","LG",1250],["Stove / Oven","GE",760],["Dishwasher","Whirlpool",540],["Washer/Dryer Combo","LG",1100],["AC Unit","Goodman",3100]],
+    photos:["Living room","Kitchen","Main bedroom","Bathroom","Balcony","Building exterior"],
+    people:[["🔧","Plumber","Demo Drain Co.","(555) 010-2230"],["🧹","Cleaner (turnover)","Sample Clean Team","(555) 010-3240"]] },
+  { id:4, cls:"p4", addr:"9 Mockingbird Sample Ln", city:"Key West, FL (sample)", type:"Duplex (one side)", beds:2, baths:1, sqft:"920", year:1987, lot:"0.11 acre (sample)",
+    renter:{name:"Casey Mock", phone:"(555) 010-1404", email:"casey.mock@example.com", lease:"Feb 1, 2026 – Jan 31, 2027 (sample)", rent:"$2,100 / mo (sample)", occupants:"2 adults (sample)"},
+    loan:{lender:"Island Sample Lending", type:"30-yr fixed (sample)", balance:"$198,750 (sample)", rate:"6.4% (sample)", payment:"$1,243 / mo (sample)", started:"Jan 2023 (sample)"},
+    assets:[["Refrigerator","Frigidaire",980],["Stove / Oven","Hotpoint",520],["Washer","GE",640],["Dryer","GE",590],["AC Unit (window x2)","Frigidaire",700]],
+    photos:["Living room","Kitchen","Bedroom","Bathroom","Front porch","Side yard"],
+    people:[["🔧","Plumber","Mock Plumbing KW","(555) 010-2330"],["🌿","Landscaper","Palm Sample Care","(555) 010-3340"],["⚡","Electrician","Sample Electric","(555) 010-4350"]] },
+  { id:5, cls:"p1", vacant:true, asking:"$2,200 / mo asking (sample)", addr:"55 Sample Shores Way", city:"Fort Myers, FL (sample)", type:"Single-family house", beds:3, baths:2, sqft:"1,350", year:2010, lot:"0.15 acre (sample)",
+    renter:{name:"No tenant — vacant", phone:"—", email:"—", lease:"No active lease", rent:"$0 / mo (sample)", occupants:"—"},
+    loan:{lender:"Owned outright (sample)", type:"No loan", balance:"$0 (sample)", rate:"—", payment:"$0 / mo (sample)", started:"—"},
+    assets:[["Refrigerator","Samsung",1500],["Stove / Oven","GE",820],["AC Unit","Carrier",3900]],
+    photos:["Living room","Kitchen","Main bedroom","Bathroom","Front exterior","Backyard"],
+    people:[["🌿","Landscaper","Shores Sample Lawn","(555) 010-5040"]] },
+];
+const EXTRA = {
+  1:{purchase:342000, valueNow:415000, balanceNum:286000,
+     keys:[["Front door code","4821 (sample)"],["Garage code","9034 (sample)"],["Alarm code","2210 (sample)"],["Lockbox","On front rail — code 7712 (sample)"],["Spare keys","2 sets — owner holds 1 (sample)"]],
+     bills:[["HOA",145,"1st of month"],["Water / Sewer",68,"15th of month"],["Pest control",45,"Quarterly"],["Lawn care",120,"Monthly"]],
+     repairs:[["AC capacitor replaced","Cool Sample Air",285,"Aug 2026 (sample)"],["Kitchen faucet cartridge","Mike's Sample Plumbing",160,"May 2026 (sample)"]], tax:[28800,9400], taxbill:["Miami-Dade County (sample)","Parcel 01-2345-678 (sample)",4850,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"], systems:[["Roof (architectural shingle)","Installed 2016 · age 10 yrs","Expected life 25 yrs","≈ 15 yrs remaining","$14,000 est. replacement"],["AC — Carrier","Installed 2019 · age 7 yrs","Expected life 15 yrs","≈ 8 yrs remaining","$5,200 est."],["Water heater — Rheem","Installed 2022 · age 4 yrs","Expected life 10 yrs","≈ 6 yrs remaining","$1,400 est."],["Electrical panel","Original 2004 · age 22 yrs","Expected life 40 yrs","≈ 18 yrs remaining","$2,800 est."],["Plumbing","Original 2004 · age 22 yrs","Expected life 50 yrs","≈ 28 yrs remaining","$9,000 est."]], utilities:[["Electric","Tenant pays (sample)"],["Water / Sewer","Owner pays (sample)"],["Gas","None — all electric (sample)"],["Trash","Included in HOA (sample)"],["Internet / Cable","Tenant pays (sample)"]], insurance:[["Provider","Sample Mutual Ins. (sample)"],["Coverage","Landlord / dwelling policy (sample)"],["Premium","$1,480 / yr (sample)"],["Deductible","$2,500 (sample)"],["Renews","Dec 2026 (sample)"],["Flood insurance","Sample Flood Co. — policy on file, renews Mar 2027 (sample)"],["Claims history","No claims on file (sample)"]], docsGap:"Survey / plat — not on file (sample)"},
+  2:{purchase:385000, valueNow:448000, balanceNum:312500,
+     keys:[["Front door code","6110 (sample)"],["Garage code","6111 (sample)"],["Alarm code","— none (sample)"],["Lockbox","Side gate — code 3308 (sample)"],["Spare keys","1 set (sample)"]],
+     bills:[["HOA",210,"1st of month"],["Water / Sewer",74,"15th of month"],["Pool service",180,"Monthly"]],
+     repairs:[["Pool pump seal","Sample Pool Tech",340,"Jul 2026 (sample)"]], tax:[31800,11200], taxbill:["Hillsborough County (sample)","Parcel 02-3456-789 (sample)",5120,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"], systems:[["Roof (architectural shingle)","Installed 2012 · age 14 yrs","Expected life 25 yrs","≈ 11 yrs remaining","$12,500 est."],["AC — Trane","Installed 2020 · age 6 yrs","Expected life 15 yrs","≈ 9 yrs remaining","$5,400 est."],["Water heater","Installed 2021 · age 5 yrs","Expected life 10 yrs","≈ 5 yrs remaining","$1,350 est."],["Electrical panel","Original 2012 · age 14 yrs","Expected life 40 yrs","≈ 26 yrs remaining","$2,600 est."],["Plumbing","Original 2012 · age 14 yrs","Expected life 50 yrs","≈ 36 yrs remaining","$8,500 est."]], utilities:[["Electric","Tenant pays (sample)"],["Water / Sewer","Owner pays (sample)"],["Gas","None — all electric (sample)"],["Trash","Included in HOA (sample)"],["Internet / Cable","Tenant pays (sample)"]], insurance:[["Provider","Sample Mutual Ins. (sample)"],["Coverage","Landlord / dwelling policy (sample)"],["Premium","$1,620 / yr (sample)"],["Deductible","$2,500 (sample)"],["Renews","Feb 2027 (sample)"],["Flood insurance","Sample Flood Co. — policy on file, renews Mar 2027 (sample)"],["Claims history","No claims on file (sample)"]], docsGap:"Roof warranty document — not on file (sample)"},
+  3:{purchase:210000, valueNow:265000, balanceNum:142000,
+     keys:[["Unit door code","7789 (sample)"],["Building entry","Fob — 2 issued (sample)"],["Alarm code","— none (sample)"],["Mailbox key","Box 4 (sample)"],["Spare keys","1 set (sample)"]],
+     bills:[["Condo HOA",265,"1st of month"],["Electric (owner acct)",0,"Tenant pays (sample)"]],
+     repairs:[["Washer/dryer combo belt","Demo Appliance Repair",210,"Sep 2026 (sample)"]], tax:[22200,6800], taxbill:["Orange County (sample)","Parcel 03-4567-890 (sample)",2640,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"], systems:[["Roof","Condo building — HOA responsibility (sample)","—","—","HOA (sample)"],["AC — Goodman","Installed 2018 · age 8 yrs","Expected life 15 yrs","≈ 7 yrs remaining","$4,600 est."],["Water heater","Installed 2020 · age 6 yrs","Expected life 10 yrs","≈ 4 yrs remaining","$1,250 est."],["Electrical panel","Original 1998 · age 28 yrs","Expected life 40 yrs","≈ 12 yrs remaining","$2,400 est."],["Plumbing","Original 1998 · age 28 yrs","Expected life 50 yrs","≈ 22 yrs remaining","$7,500 est."]], utilities:[["Electric","Tenant pays (sample)"],["Water / Sewer","Included in condo HOA (sample)"],["Gas","None — all electric (sample)"],["Trash","Included in HOA (sample)"],["Internet / Cable","Tenant pays (sample)"]], insurance:[["Provider","Sample Mutual Ins. (sample)"],["Coverage","Condo walls-in (HO-6 style) policy (sample)"],["Premium","$1,180 / yr (sample)"],["Deductible","$1,000 (sample)"],["Renews","Jun 2027 (sample)"],["Flood insurance","Sample Flood Co. — policy on file (sample); building cover via HOA master policy (sample)"],["Claims history","No claims on file (sample)"]], docsGap:"HOA master policy copy — not on file (sample)"},
+  4:{purchase:268000, valueNow:329000, balanceNum:198750,
+     keys:[["Front door code","3456 (sample)"],["Side gate","Padlock — code 0917 (sample)"],["Alarm code","5540 (sample)"],["Lockbox","Porch — code 2020 (sample)"],["Spare keys","2 sets (sample)"]],
+     bills:[["Water / Sewer",59,"15th of month"],["Pest control",40,"Quarterly"],["Lawn care",95,"Monthly"]],
+     repairs:[["Water heater flush + anode","Mock Plumbing KW",190,"Jun 2026 (sample)"],["Porch railing repair","Sample Handyman",275,"Apr 2026 (sample)"]], tax:[25200,8100], taxbill:["Monroe County (sample)","Parcel 04-5678-901 (sample)",3310,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"], systems:[["Roof (metal)","Installed 2010 · age 16 yrs","Expected life 25 yrs","≈ 9 yrs remaining","$11,000 est."],["AC — window units","Installed 2021 · age 5 yrs","Expected life 10 yrs","≈ 5 yrs remaining","$900 est."],["Water heater","Installed 2019 · age 7 yrs","Expected life 10 yrs","≈ 3 yrs remaining","$1,200 est."],["Electrical panel","Original 1987 · age 39 yrs","Expected life 40 yrs","≈ 1 yr — plan replacement (sample)","$2,900 est."],["Plumbing","Original 1987 · age 39 yrs","Expected life 50 yrs","≈ 11 yrs remaining","$8,000 est."]], utilities:[["Electric","Tenant pays (sample)"],["Water / Sewer","Owner pays (sample)"],["Gas","None — all electric (sample)"],["Trash","Owner pays (sample)"],["Internet / Cable","Tenant pays (sample)"]], insurance:[["Provider","Sample Gulf Ins. (sample)"],["Coverage","Landlord / dwelling + wind (sample)"],["Premium","$1,710 / yr (sample)"],["Deductible","$2,500 (sample)"],["Renews","Apr 2027 (sample)"],["Flood insurance","Sample Flood Co. — $640 / yr (sample)"],["Claims history","No claims on file (sample)"]], docsGap:"Elevation certificate — not on file (sample)"},
+  5:{purchase:255000, valueNow:298000, balanceNum:0,
+     keys:[["Front door code","9021 (sample)"],["Lockbox","Front door — code 4455 (sample)"],["Spare keys","2 sets (sample)"]],
+     bills:[["Lawn care (while vacant)",0,"As needed (sample)"]],
+     repairs:[["Deep clean + paint touch-up","Sample Clean Team",600,"Sep 2026 (sample)"]], tax:[0,900], taxbill:["Lee County (sample)","Parcel 05-6789-012 (sample)",3980,"Due Nov 30, 2026 (sample)","2025 bill — PAID (sample)"], systems:[["Roof (architectural shingle)","Installed 2010 · age 16 yrs","Expected life 25 yrs","≈ 9 yrs remaining","$12,000 est."],["AC — Carrier","Installed 2017 · age 9 yrs","Expected life 15 yrs","≈ 6 yrs remaining","$5,000 est."],["Water heater","Installed 2023 · age 3 yrs","Expected life 10 yrs","≈ 7 yrs remaining","$1,300 est."],["Electrical panel","Original 2010 · age 16 yrs","Expected life 40 yrs","≈ 24 yrs remaining","$2,600 est."],["Plumbing","Original 2010 · age 16 yrs","Expected life 50 yrs","≈ 34 yrs remaining","$8,200 est."]], utilities:[["Electric","Owner pays while vacant (sample)"],["Water / Sewer","Owner pays (sample)"],["Gas","None — all electric (sample)"],["Trash","Owner pays (sample)"],["Internet / Cable","— vacant (sample)"]], insurance:[["Provider","Sample Mutual Ins. (sample)"],["Coverage","Vacant-home endorsement (sample)"],["Premium","$1,390 / yr (sample)"],["Deductible","$2,500 (sample)"],["Renews","Jan 2027 (sample)"],["Flood insurance","Sample Flood Co. — policy on file, renews Mar 2027 (sample)"],["Claims history","No claims on file (sample)"]], docsGap:"Prior inspection report — not on file (sample)"},
+};
+let current = null;
+let rentPaid = {1:false,2:true,3:false,4:true,5:false};
+const money = n => "$" + Number(n).toLocaleString();
+function extra(){ return EXTRA[current.id]; }
+function parseMoneyStr(s){ const m = String(s).replace(/,/g,'').match(/[\d.]+/); return m ? Number(m[0]) : 0; }
+
+/* ================= NAVIGATION — tabs separating the app ================= */
+function goPage(name){
+  document.querySelectorAll('[data-page]').forEach(p=>p.classList.toggle('hidden', p.dataset.page!==name));
+  document.getElementById('detailView').classList.add('hidden');
+  document.querySelectorAll('.dock button').forEach(b=>b.classList.toggle('on', b.dataset.dock===name));
+  window.scrollTo({top:0});
+}
+function setSide(side){
+  document.getElementById('segOwner').classList.toggle('on', side==='owner');
+  document.getElementById('segRenter').classList.toggle('on', side==='renter');
+  document.getElementById('ownerSide').classList.toggle('hidden', side!=='owner');
+  document.getElementById('renterSide').classList.toggle('hidden', side!=='renter');
+  document.getElementById('dock').classList.toggle('hidden', side!=='owner');
+}
+function setGroup(btn){
+  document.querySelectorAll('.gtabs button').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+  const g = btn.dataset.group;
+  document.querySelectorAll('[data-gpane]').forEach(p=>p.classList.toggle('hidden', p.dataset.gpane!==g));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function jump(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
+function showList(){ goPage('home'); }
+
+/* ================= OVERVIEW — locations with pertinent info ================= */
+function statusPill(p){
+  if(p.vacant) return '<span class="chip status-vacant"><b style="color:#fff">⛔ UNOCCUPIED</b></span>';
+  return rentPaid[p.id] ? '<span class="chip"><b style="color:var(--teal)">● RENT PAID</b></span>' : '<span class="chip"><b style="color:var(--red)">● RENT DUE</b></span>';
+}
+function renderList(){
+  const q = (document.getElementById('propSearch').value||'').toLowerCase();
+  const list = PROPERTIES.filter(p => (p.addr+' '+p.city+' '+p.renter.name+' '+p.type).toLowerCase().includes(q));
+  document.getElementById('propList').innerHTML = list.length ? list.map(p=>`
+    <button class="prop ${p.vacant?'vacant':''} ${reportMode && selReports.has(p.id) ? 'selected' : ''}" onclick="cardClick(${p.id})">
+      ${p.vacant ? '<div class="vacant-flag">⛔ Vacant — no tenant</div>' : ''}
+      <div class="photo ${p.cls}">${p.addr}</div>
+      <div class="pbody">
+        ${reportMode ? `<div style="margin-bottom:6px"><span class="chip" style="${selReports.has(p.id)?'background:var(--gold);color:#10131a;border-color:transparent':''}"><b style="${selReports.has(p.id)?'color:#10131a':''}">${selReports.has(p.id)?'✅ Selected for report':'○ Tap to select for report'}</b></span></div>` : ''}
+        <div class="addr">${p.vacant?'⛔ ':''}${p.addr}</div>
+        <div class="meta">${p.city} · ${p.type} · ${p.beds} bed · ${p.baths} bath · ${p.sqft} sq ft</div>
+        <div class="chips">
+          ${p.vacant
+            ? `<span class="chip">Tenant: <b>None</b></span><span class="chip"><b>${p.asking}</b></span><span class="chip"><b>Not earning rent</b></span>`
+            : `<span class="chip">Tenant: <b>${p.renter.name}</b></span><span class="chip">Rent: <b>${p.renter.rent.replace(' (sample)','')}</b></span><span class="chip">Lease ends: <b>${p.renter.lease.split('– ')[1]||''}</b></span>`}
+          ${statusPill(p)}
+        </div>
+      </div>
+    </button>`).join('') : '<p class="note">No location matches that search.</p>';
+  document.getElementById('statCount').textContent = PROPERTIES.length;
+}
+function renderAttention(){
+  const el = document.getElementById('attentionList'); if(!el) return;
+  const items = [];
+  PROPERTIES.forEach(p=>{ if(!p.vacant && !rentPaid[p.id]) items.push(['🔴','Rent due — ' + p.addr, p.renter.rent + ' · ' + p.renter.name + ' (sample)']); });
+  PROPERTIES.forEach(p=>{ if(p.vacant) items.push(['⛔','UNOCCUPIED — ' + p.addr, p.asking + ' · no tenant · not earning rent (sample)']); });
+  items.push(['🟠','Lease ending soon — 101 Sample Palms Dr','Ends Dec 31, 2026 · 78 days (sample)']);
+  const top = items.slice(0,3);
+  el.innerHTML = top.length ? top.map(([i,t,s])=>`<div class="asset"><span>${i} ${t}<small>${s}</small></span></div>`).join('') : '<p style="margin:4px 0">✅ All clear — nothing needs you right now.</p>';
+}
+
+/* ================= LOCATION FULL PAGE ================= */
+function kvRows(pairs){ return pairs.map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join(''); }
+function openProp(id){
+  current = PROPERTIES.find(p=>p.id===id);
+  document.querySelectorAll('[data-page]').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('detailView').classList.remove('hidden');
+  document.querySelectorAll('.dock button').forEach(b=>b.classList.toggle('on', b.dataset.dock==='home'));
+  const ph = document.getElementById('dPhoto'); ph.className = 'photo ' + current.cls; ph.textContent = current.addr;
+  if(current.vacant){ ph.style.filter='grayscale(1) brightness(.52) contrast(.95)'; ph.style.border='2px dashed #9aa1ab'; } else { ph.style.filter=''; ph.style.border=''; }
+  document.getElementById('dAddr').textContent = current.addr + (current.vacant ? ' — ⛔ VACANT' : '');
+  document.getElementById('dMeta').textContent = current.city + ' · ' + current.type;
+  document.getElementById('vacantHero').classList.toggle('hidden', !current.vacant);
+  document.querySelector('[data-group="people"]').style.filter = current.vacant ? 'grayscale(1) opacity(.65)' : '';
+  document.getElementById('propertyRows').innerHTML = kvRows([['Address',current.addr],['City',current.city],['Type',current.type],['Bedrooms',current.beds],['Bathrooms',current.baths],['Sq ft',current.sqft],['Year built',current.year],['Lot',current.lot],['Status', current.vacant ? 'VACANT — no tenant (still fully manageable)' : 'Occupied — tenant in place']]);
+  document.getElementById('keysRows').innerHTML = extra().keys.map(([l,v])=>`<div class="row"><span><small>${l}</small></span><b>${v}</b></div>`).join('');
+  document.getElementById('renterRows').innerHTML = current.vacant
+    ? kvRows([['Status','No tenant — this location is vacant'],['Asking rent', current.asking],['Next step','List it / schedule tours (sample)']])
+    : kvRows([['Tenant name',current.renter.name],['Phone',current.renter.phone],['Email',current.renter.email],['Occupants',current.renter.occupants]]);
+  renderCrm(); renderLease(); renderBg(); renderRent(); renderLoanEquity(); renderBills(); renderPropTax(); renderNotes(); renderVacancy(); renderDocs(); renderAssets(); renderRepairs(); renderPhotos(); renderPeople(); renderCk(); updateSticky();
+  document.querySelectorAll('.gtabs button').forEach(b=>b.classList.toggle('on', b.dataset.group==='overview'));
+  document.querySelectorAll('[data-gpane]').forEach(p=>p.classList.toggle('hidden', p.dataset.gpane!=='overview'));
+  applyPrefs();
+  window.scrollTo({top:0});
+}
+function updateSticky(){
+  if(!current) return;
+  document.getElementById('sbAddr').textContent = current.addr;
+  document.getElementById('sbRent').innerHTML = current.vacant ? '<b style="color:#fff">⛔ UNOCCUPIED</b>' : (rentPaid[current.id] ? '<b style="color:var(--teal)">● RENT PAID</b>' : '<b style="color:var(--red)">● RENT DUE</b>');
+  if(current.vacant) document.getElementById('sbRent').classList.add('status-vacant'); else document.getElementById('sbRent').classList.remove('status-vacant');
+}
+/* --- Renter & Lease group --- */
+function renderCrm(){
+  const el = document.getElementById('crmCard');
+  if(current.vacant){
+    el.innerHTML = `
+      <div class="row" style="margin-top:8px"><span><small>Stage (CRM pipeline)</small></span><b>Inquiry → Toured → Applied → Approved → Leased</b></div>
+      <div class="row"><span><small>Current stage</small></span><b><span class="chip"><b>● No prospects yet (sample)</b></span></b></div>
+      <p class="note">Grayed tab, fully functional: when a prospect appears, they move along the stage pills until they lease. (CRM pattern from the study.)</p>`;
+    return;
+  }
+  const r = current.renter, digits = r.phone.replace(/[^0-9]/g,''), paidYtd = parseMoneyStr(r.rent) * 9;
+  el.innerHTML = `
+    <div class="qa">
+      <a href="tel:${digits}" style="background:var(--gold);color:#10131a">📞 Call</a>
+      <a href="sms:${digits}" style="background:var(--card2);color:var(--text);border:1px solid var(--line)">💬 Text</a>
+      <a href="mailto:${r.email}" style="background:var(--card2);color:var(--text);border:1px solid var(--line)">✉️ Email</a>
+    </div>
+    <div class="row" style="margin-top:8px"><span><small>Stage (CRM)</small></span><b><span class="chip"><b style="color:var(--teal)">● Current renter</b></span></b></div>
+    <div class="row"><span><small>Next step · due</small></span><b>Send lease renewal packet · by Nov 1, 2026 (sample)</b></div>
+    <div class="row"><span><small>Money strip — paid this year</small></span><b>${money(paidYtd)} · 1 late (sample)</b></div>
+    <h4 style="margin:14px 0 4px">Timeline — everything with this renter</h4>
+    <div class="asset"><span>💵 Rent paid — Sep 2026<small>On time (sample)</small></span></div>
+    <div class="asset"><span>🔧 Service visit logged<small>See Repairs in Assets &amp; Docs (sample)</small></span></div>
+    <div class="asset"><span>📷 Move-in photos taken<small>Proof of state (sample)</small></span></div>
+    <div class="asset"><span>📄 Lease signed<small>${r.lease} (sample)</small></span></div>`;
+}
+function renderLease(){
+  document.getElementById('leaseRows').innerHTML = current.vacant
+    ? kvRows([['Lease document','— none (vacant)'],['Status','No active lease']])
+    : kvRows([['Lease document','📄 Signed Lease Agreement — stored in Documents'],['Tenant',current.renter.name],['Lease term',current.renter.lease],['Monthly rent',current.renter.rent],['Security deposit held','$2,400 (sample)'],['Heads-up','⚠️ Review renewal 60 days before end date (sample)']]);
+}
+/* --- Tenant background check (per location, toggleable section) --- */
+let bgStore = {};
+function bgFilesFor(id){
+  const p = PROPERTIES.find(x=>x.id===id);
+  if(!bgStore[id]) bgStore[id] = p.vacant ? [] : [{name:'Background Check Report — ' + p.renter.name + ' (PDF)', sample:true}];
+  return bgStore[id];
+}
+function bgFiles(){ return bgFilesFor(current.id); }
+function renderBg(){
+  document.getElementById('bgRows').innerHTML = current.vacant
+    ? kvRows([['Required','Set by the administrator (sample)'],['Performed','— no tenant yet'],['Where it lives','Applicant checks upload right here as prospects apply (sample)']])
+    : kvRows([['Tenant',current.renter.name],['Required','Yes (sample)'],['Performed','Yes — Aug 12, 2026 (sample)'],['Result','Passed screening (sample)'],['Screening provider','Sample Screening Co. (sample)'],['Consent on file','Yes (sample)']]);
+  const files = bgFiles();
+  document.getElementById('bgList').innerHTML = files.length ? files.map((f,i)=>`
+    <div class="asset"><span>${f.kind==='image' ? `<img src="${f.url}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:8px">` : '📄 '}${escHtml(f.name)}<small>${f.sample ? 'Stored with this location (sample document)' : 'Uploaded just now (this session)'}</small></span>${f.sample ? '<span class="chip"><b>On file</b></span>' : `<button type="button" onclick="removeBg(${i})" style="border:none;background:none;color:var(--red);font-weight:800;cursor:pointer">Remove</button>`}</div>`).join('')
+    : '<p class="note">No background check uploaded for this location yet.</p>';
+}
+function addBgFiles(input){
+  Array.from(input.files||[]).forEach(f=>{
+    if(f.type.indexOf('image')===0){ const r = new FileReader(); r.onload = ()=>{ bgFiles().push({name:f.name, kind:'image', url:r.result}); renderBg(); }; r.readAsDataURL(f); }
+    else bgFiles().push({name:f.name, kind:'file', url: URL.createObjectURL(f)});
+  });
+  renderBg();
+}
+function removeBg(i){ bgFiles().splice(i,1); renderBg(); }
+/* --- Money group --- */
+function renderRent(){
+  if(current.vacant){
+    document.getElementById('rentNow').innerHTML = '<div class="row"><span><small>October 2026 rent</small></span><b>— Vacant, no rent due</b></div>';
+    document.getElementById('rentHistory').innerHTML = '<p class="note">No payment history yet — this location has no tenant.</p>';
+    return;
+  }
+  document.getElementById('rentNow').innerHTML = `
+    <div class="row"><span><small>October 2026 rent</small>${current.renter.rent}</span><b style="color:${rentPaid[current.id]?'var(--teal)':'var(--gold)'}">${rentPaid[current.id]?'PAID ✓':'DUE'}</b></div>
+    <button class="addbtn" style="width:100%;margin-top:10px" onclick="toggleRent()">${rentPaid[current.id]?'Mark October as NOT paid':'Mark October as PAID'}</button>`;
+  document.getElementById('rentHistory').innerHTML = ['Jul 2026','Aug 2026','Sep 2026'].map((m,i)=>`
+    <div class="asset"><span>${m}<small>${current.renter.name}</small></span><b style="color:${i===1?'var(--gold)':'var(--teal)'}">${i===1?'Paid late (sample)':'Paid on time (sample)'}</b></div>`).join('');
+}
+function toggleRent(){ rentPaid[current.id]=!rentPaid[current.id]; renderRent(); renderAttention(); renderList(); updateSticky(); }
+function renderLoanEquity(){
+  document.getElementById('loanRows').innerHTML = kvRows([['Lender',current.loan.lender],['Loan type',current.loan.type],['Balance',current.loan.balance],['Rate',current.loan.rate],['Monthly payment',current.loan.payment],['Started',current.loan.started]]);
+  const x = extra(), eq = x.valueNow - x.balanceNum;
+  document.getElementById('equityRows').innerHTML = kvRows([['Bought for',money(x.purchase)],['Worth now (sample estimate)',money(x.valueNow)],['Loan balance',money(x.balanceNum)],['Equity', money(eq) + ' (' + (x.valueNow?Math.round(eq/x.valueNow*100):0) + '%)']]);
+}
+function renderBills(){
+  const b = extra().bills;
+  document.getElementById('billList').innerHTML = b.map(x=>`<div class="asset"><span>${x[0]}<small>Due: ${x[2]}</small></span><b>${x[1]? money(x[1])+' / mo':'—'}</b></div>`).join('');
+  document.getElementById('billTotal').textContent = money(b.reduce((s,x)=>s+Number(x[1]),0)) + ' / mo';
+}
+function addBill(e){ e.preventDefault(); const n=document.getElementById('bName').value.trim(), a=Number(document.getElementById('bAmt').value), d=document.getElementById('bDue').value.trim()||'Monthly'; if(!n||isNaN(a)) return; extra().bills.push([n,a,d]); renderBills(); e.target.reset(); }
+/* --- Property tax (per location) --- */
+function renderPropTax(){
+  const t = extra().taxbill;
+  document.getElementById('taxPropRows').innerHTML = kvRows([['County',t[0]],['Parcel',t[1]],['Annual tax',money(t[2]) + ' / yr (sample)'],['Next due',t[3]],['Status',t[4]],['Assessed value (county)',money(extra().valueNow) + ' (sample)']]);
+}
+/* --- Owner notes (private, per location) --- */
+let notesStore = {1:"Gate sticks when it's humid — lift while you pull (sample). HOA repaint approved for spring — remind the renter before they schedule anything big (sample)."};
+function renderNotes(){ document.getElementById('ownerNotes').value = notesStore[current.id] || ''; }
+function saveNotes(){ notesStore[current.id] = document.getElementById('ownerNotes').value; }
+/* --- Vacancy mode (per location) --- */
+let showingsStore = {5:[["Oct 3, 2026","Toured — liked it, asked about pets (sample)"],["Oct 10, 2026","Toured — no decision yet (sample)"]]};
+function renderVacancy(){
+  const el = document.getElementById('vacancyBody');
+  if(!current.vacant){
+    el.innerHTML = '<div class="row"><span><small>Vacancy Mode</small></span><b>OFF — tenant in place</b></div><p class="note">Vacancy Mode switches on by itself the moment this location empties: days-vacant counter, showings log, and rent-not-collected estimate, all in this spot.</p>';
+    return;
+  }
+  const shows = showingsStore[current.id] || [];
+  el.innerHTML = `
+    <div class="row"><span><small>Vacancy Mode</small></span><b style="color:var(--gold)">ON — this location is empty</b></div>
+    <div class="row"><span><small>On the market since</small></span><b>Sep 20, 2026 (sample)</b></div>
+    <div class="row"><span><small>Days vacant</small></span><b>24 days (sample)</b></div>
+    <div class="row"><span><small>Asking rent</small></span><b>${current.asking}</b></div>
+    <div class="row"><span><small>Rent not collected so far</small></span><b>≈ $1,760 (sample estimate)</b></div>
+    <div class="row"><span><small>Utilities while vacant</small></span><b>Water on (owner) · Electric on (owner) (sample)</b></div>
+    <h4 style="margin:14px 0 4px">Showings log</h4>
+    ${shows.length ? shows.map(s=>`<div class="asset"><span>${s[0]}<small>${s[1]}</small></span></div>`).join('') : '<p class="note">No showings logged yet.</p>'}
+    <form onsubmit="addShowing(event)">
+      <input id="shWhen" placeholder="Showing — e.g. Oct 18, 2026 (sample)">
+      <input id="shNote" placeholder="Outcome — e.g. Toured, very interested" required>
+      <button class="addbtn" type="submit">+ Log a showing</button>
+    </form>`;
+}
+function addShowing(e){ e.preventDefault(); const w=document.getElementById('shWhen').value.trim()||'Oct 2026 (sample)'; const n=document.getElementById('shNote').value.trim(); if(!n) return; (showingsStore[current.id]=showingsStore[current.id]||[]).push([w,n+' (sample)']); renderVacancy(); }
+/* --- Assets & Docs group --- */
+function renderAssets(){
+  document.getElementById('assetList').innerHTML = current.assets.map(a=>`<div class="asset"><span>${a[0]}<small>${a[1]}</small></span><b>${money(a[2])}</b></div>`).join('');
+  document.getElementById('assetTotal').textContent = money(current.assets.reduce((s,a)=>s+Number(a[2]),0));
+}
+function addAsset(e){ e.preventDefault(); const n=document.getElementById('aName').value.trim(), b=document.getElementById('aBrand').value.trim(), v=Number(document.getElementById('aValue').value); if(!n||!b||!v) return; current.assets.push([n,b,v]); renderAssets(); e.target.reset(); }
+function renderRepairs(){
+  document.getElementById('repairList').innerHTML = extra().repairs.map(r=>`<div class="asset"><span>${r[0]}<small>${r[1]} · ${r[3]}</small></span><b>${money(r[2])}</b></div>`).join('') || '<p class="note">No repairs logged yet.</p>';
+}
+function addRepair(e){ e.preventDefault(); const w=document.getElementById('rWhat').value.trim(), who=document.getElementById('rWho').value.trim()||'—', c=Number(document.getElementById('rCost').value)||0; if(!w) return; extra().repairs.push([w,who,c,'Oct 2026 (sample)']); renderRepairs(); e.target.reset(); }
+let docCat = 'All';
+function docsFor(p){
+  if(p.vacant) return [["Property Deed","Ownership","Recorded (sample)"],["Property Insurance Policy — Sample Mutual Ins.","Insurance","Renews Dec 2026 (sample)"],["Inspection Report (vacant)","Ownership","Sep 2026 (sample)"],["Loan Documents — none (owned outright)","Loan","— (sample)"]];
+  return [["Signed Lease Agreement","Lease",p.renter.lease],["Property Deed","Ownership","Recorded (sample)"],["Property Insurance Policy — Sample Mutual Ins.","Insurance","Renews Dec 2026 (sample)"],["Insurance Certificate (proof of insurance)","Insurance","Issued Jan 2026 (sample)"],["Flood Insurance Policy — Sample Flood Co.","Insurance","Renews Mar 2027 (sample)"],["Property Tax Document — 2025","Tax","Filed (sample)"],["Loan Documents — " + p.loan.lender,"Loan",p.loan.started],["Move-In Inspection Report","Ownership","With before photos (sample)"]];
+}
+function renderDocs(){
+  const q = (document.getElementById('docSearch').value||'').toLowerCase();
+  const docs = docsFor(current).filter(d => (docCat==='All'||d[1]===docCat) && (d[0]+' '+d[1]+' '+d[2]).toLowerCase().includes(q));
+  document.getElementById('docList').innerHTML = docs.length ? docs.map(d=>`<div class="asset"><span>📄 ${d[0]}<small>${d[2]}</small></span><span class="chip"><b>${d[1]}</b></span></div>`).join('') : '<p class="note">No documents match that search.</p>';
+}
+function setDocCat(c){ docCat=c; renderDocs(); }
+function renderPhotos(){
+  document.getElementById('photoGrid').innerHTML = current.photos.map((name,i)=>`<div class="ph ${current.cls}" style="filter:hue-rotate(${i*12}deg)">📷 ${name}<br><small>Before move-in</small></div>`).join('');
+}
+function renderPeople(){
+  document.getElementById('peopleList').innerHTML = current.people.map((p,i)=>`
+    <div class="person"><div class="avatar">${p[0]}</div><div>${p[2]}<small>${p[1]} · ${p[3]}<br><span class="chip" style="font-size:11px">${i===0?'Regular · Insurance cert on file — renews Mar 2027 (sample)':'Regular (sample)'}</span></small></div><a class="call" href="tel:${p[3].replace(/[^0-9]/g,'')}">Call</a></div>`).join('');
+}
+function addPerson(e){ e.preventDefault(); const r=document.getElementById('pRole').value.trim(), n=document.getElementById('pName').value.trim(), ph=document.getElementById('pPhone').value.trim()||'—'; if(!r||!n) return; current.people.push(['👤',r,n,ph]); renderPeople(); e.target.reset(); }
+/* checklist — per-item notes + uploads (images/videos/files), add/remove items in-app (Bori, Oct 14) */
+const CK_DEFAULTS = ["Living room — walls & floors","Kitchen — appliances tested","Kitchen — counters & cabinets","Main bedroom","Bathrooms — plumbing & fixtures","Windows & doors lock","AC / heat runs","Water heater checked","Keys handed over & counted","Meter readings recorded","Photos taken of every room"];
+let ckItemsStore = {}, ckState = {}, ckMode = 'in', ckOpen = {};
+let ckSeq = 0;
+function ckItems(){
+  if(!ckItemsStore[current.id]) ckItemsStore[current.id] = CK_DEFAULTS.map(label => ({id:'ck'+(++ckSeq), label}));
+  return ckItemsStore[current.id];
+}
+function ckEntry(itemId){
+  const key = current.id + '-' + ckMode;
+  if(!ckState[key]) ckState[key] = {};
+  if(!ckState[key][itemId]) ckState[key][itemId] = {checked:false, notes:'', atts:[]};
+  return ckState[key][itemId];
+}
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderCk(){
+  const items = ckItems();
+  document.getElementById('ckList').innerHTML = items.length ? items.map(it=>{
+    const e = ckEntry(it.id), open = !!ckOpen[it.id];
+    const meta = [e.notes ? '📝 note saved' : '', e.atts.length ? '📎 ' + e.atts.length + ' file' + (e.atts.length>1?'s':'') : ''].filter(Boolean).join(' · ');
+    const attHtml = e.atts.map((a,ai)=>{
+      if(a.kind==='image') return `<div style="position:relative;width:76px;height:76px"><img src="${a.url}" style="width:76px;height:76px;object-fit:cover;border-radius:10px"><button type="button" onclick="removeCkAtt('${it.id}',${ai})" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--red);color:#fff;font-weight:800;cursor:pointer">×</button></div>`;
+      if(a.kind==='video') return `<div style="position:relative;width:120px"><video src="${a.url}" controls style="width:120px;border-radius:10px"></video><button type="button" onclick="removeCkAtt('${it.id}',${ai})" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--red);color:#fff;font-weight:800;cursor:pointer">×</button></div>`;
+      return `<span class="chip" style="max-width:100%">📄 ${escHtml(a.name)} <button type="button" onclick="removeCkAtt('${it.id}',${ai})" style="border:none;background:none;color:var(--red);font-weight:800;cursor:pointer">×</button></span>`;
+    }).join('');
+    return `<div class="asset" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" ${e.checked?'checked':''} onchange="toggleCk('${it.id}')" style="width:22px;height:22px;accent-color:var(--teal);flex:none">
+        <span style="flex:1">${escHtml(it.label)}${meta?`<small>${meta}</small>`:''}</span>
+        <button type="button" class="chip" style="cursor:pointer" onclick="toggleCkEditor('${it.id}')">${open?'Done':'📝＋📎 Note / files'}</button>
+        <button type="button" title="Remove item" onclick="removeCkItem('${it.id}')" style="border:none;background:none;color:var(--red);font-size:16px;font-weight:800;cursor:pointer;padding:2px 6px">✕</button>
+      </div>
+      ${open?`<div style="margin-top:10px">
+        <textarea id="cknote-${it.id}" rows="2" placeholder="Note for this item — condition, serial #, anything (sample)" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px;font-family:inherit;font-size:14px;box-sizing:border-box" onchange="saveCkNote('${it.id}')">${escHtml(e.notes)}</textarea>
+        <label class="addbtn" style="display:block;text-align:center;cursor:pointer;margin-top:8px">📎 Add photo / video / file<input type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt" style="display:none" onchange="addCkFiles('${it.id}', this)"></label>
+        ${e.atts.length?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${attHtml}</div>`:''}
+      </div>`:''}
+    </div>`;
+  }).join('') : '<p class="note">No items in this checklist yet — add the first one below.</p>';
+  const done = items.filter(it=>ckEntry(it.id).checked).length;
+  const pct = items.length ? Math.round(done / items.length * 100) : 0;
+  document.getElementById('ckBar').style.width = pct + '%';
+  document.getElementById('ckPct').textContent = pct + '% checked — ' + (ckMode==='in'?'Move-In':'Move-Out') + ' walkthrough';
+}
+function toggleCk(id){ const e=ckEntry(id); e.checked=!e.checked; renderCk(); }
+function toggleCkEditor(id){ ckOpen[id]=!ckOpen[id]; renderCk(); }
+function saveCkNote(id){ const t=document.getElementById('cknote-'+id); if(t) ckEntry(id).notes = t.value; renderCk(); }
+function addCkFiles(id, input){
+  const e = ckEntry(id);
+  Array.from(input.files||[]).forEach(f=>{
+    const kind = f.type.indexOf('image')===0 ? 'image' : (f.type.indexOf('video')===0 ? 'video' : 'file');
+    if(kind==='image'){ const r = new FileReader(); r.onload = ()=>{ e.atts.push({name:f.name, kind:kind, url:r.result}); ckOpen[id]=true; renderCk(); }; r.readAsDataURL(f); }
+    else e.atts.push({name:f.name, kind:kind, url: URL.createObjectURL(f)});
+  });
+  ckOpen[id]=true; renderCk();
+}
+function removeCkAtt(id, idx){ ckEntry(id).atts.splice(idx,1); renderCk(); }
+function addCkItem(ev){ ev.preventDefault(); const inp=document.getElementById('ckNewItem'); const v=inp.value.trim(); if(!v) return; ckItems().push({id:'ck'+(++ckSeq), label:v}); ev.target.reset(); renderCk(); }
+function removeCkItem(id){
+  ckItemsStore[current.id] = ckItems().filter(it=>it.id!==id);
+  ['in','out'].forEach(m=>{ const k=current.id+'-'+m; if(ckState[k]) delete ckState[k][id]; });
+  delete ckOpen[id]; renderCk();
+}
+function setCkMode(m){ ckMode=m; document.getElementById('ckIn').classList.toggle('on',m==='in'); document.getElementById('ckOut').classList.toggle('on',m==='out'); renderCk(); }
+/* ================= CALENDAR ================= */
+let calEvents = {1:["Rent due — all locations (sample)"],5:["HOA due — 780 Demo Grove (sample)"],15:["Loan payments — all locations (sample)"],20:["Insurance renewal review (sample)"],31:["Lease check: 101 Sample Palms (sample)"]};
+let calSel = 1;
+function renderCal(){
+  const grid = document.getElementById('calGrid'); if(!grid) return;
+  let cells = ['S','M','T','W','T','F','S'].map(d=>`<div style="text-align:center;color:var(--muted);font-size:11px;font-weight:700">${d}</div>`).join('');
+  for(let i=0;i<4;i++) cells += '<div></div>';
+  for(let d=1; d<=31; d++){
+    const has = calEvents[d] && calEvents[d].length;
+    cells += `<button onclick="selDay(${d})" style="border:1px solid ${d===calSel?'var(--gold)':'var(--line)'};background:${d===calSel?'var(--card2)':'var(--card)'};color:var(--text);border-radius:10px;padding:8px 0;font-weight:700;cursor:pointer">${d}${has?'<div style="color:var(--gold);font-size:9px;line-height:1">●</div>':'<div style="font-size:9px;line-height:1">&nbsp;</div>'}</button>`;
+  }
+  grid.innerHTML = cells;
+  const ev = calEvents[calSel]||[];
+  document.getElementById('calEvents').innerHTML = `<b>Oct ${calSel}, 2026</b>` + (ev.length ? ev.map(e=>`<div class="asset"><span>📌 ${e}</span></div>`).join('') : '<p class="note">Nothing due this day (sample).</p>');
+}
+function selDay(d){ calSel=d; renderCal(); }
+function addEvent(e){ e.preventDefault(); const d=Number(document.getElementById('eDay').value), t=document.getElementById('eTitle').value.trim(); if(!d||!t) return; (calEvents[d]=calEvents[d]||[]).push(t+' (sample)'); calSel=d; renderCal(); e.target.reset(); }
+/* ================= TAX ================= */
+function renderTax(){
+  let net=0;
+  document.getElementById('taxRows').innerHTML = PROPERTIES.map(p=>{ const t=EXTRA[p.id].tax; net+=t[0]-t[1]; return `<div class="asset"><span>${p.addr}<small>Income ${money(t[0])} · Expenses ${money(t[1])} (sample)</small></span><b>${money(t[0]-t[1])}</b></div>`; }).join('');
+  document.getElementById('taxNet').textContent = money(net);
+}
+/* ================= PILLARS: customize + accuracy ================= */
+const PREF_DEFS = [
+  ['mod-attention','Needs Attention (Overview)'], ['mod-money','Money Dashboard'], ['mod-tax','Year-End Tax Summary'], ['mod-calendar','Calendar'],
+  ['sec-property','Property Details + Keys & Access'], ['sec-photos','Photos — proof of state'], ['sec-checklist','Move In/Out Checklist'], ['sec-notes','Owner Notes section'], ['sec-vacancy','Vacancy Mode section'],
+  ['sec-renter','Renter contact card'], ['sec-lease','Lease section'], ['sec-background','Tenant Background Check section'], ['sec-people','Service People section'],
+  ['sec-rent','Rent Tracker'], ['sec-loan','Loan + Equity section'], ['sec-bills','Bills section'], ['sec-taxprop','Property Tax section'],
+  ['sec-assets','Assets (appliances)'], ['sec-repairs','Repairs & Maintenance log'], ['sec-docs','Documents section'],
+  ['feat-report','Location Reports (print / email / download)'],
+];
+let prefs = {};
+try { prefs = JSON.parse(localStorage.getItem('recc_prefs')||'{}'); } catch(e){ prefs = {}; }
+PREF_DEFS.forEach(([k])=>{ if(prefs[k]===undefined) prefs[k]=true; });
+function savePrefs(){ try { localStorage.setItem('recc_prefs', JSON.stringify(prefs)); } catch(e){} }
+function renderPrefs(){
+  document.getElementById('prefList').innerHTML = PREF_DEFS.map(([k,label])=>`<label class="asset" style="cursor:pointer"><span>${label}</span><input type="checkbox" ${prefs[k]?'checked':''} onchange="togglePref('${k}')" style="width:22px;height:22px;accent-color:var(--gold)"></label>`).join('');
+}
+function applyPrefs(){
+  PREF_DEFS.forEach(([k])=>{ const el=document.getElementById(k); if(el) el.style.display = prefs[k] ? '' : 'none'; });
+  document.querySelectorAll('.report-ui').forEach(el=>{ el.style.display = prefs['feat-report']===false ? 'none' : ''; });
+  document.querySelectorAll('.index button').forEach(b=>{
+    const m = (b.getAttribute('onclick')||'').match(/jump\('([^']+)'\)/);
+    if(m && prefs[m[1]]===false) b.style.display='none'; else if(m) b.style.display='';
+  });
+}
+function togglePref(k){ prefs[k]=!prefs[k]; savePrefs(); applyPrefs(); }
+function setTheme(t){ document.documentElement.dataset.theme = t; try { localStorage.setItem('recc_theme', t); } catch(e){} }
+try { const st = localStorage.getItem('recc_theme'); if(st) document.documentElement.dataset.theme = st; } catch(e){}
+function runDataCheck(){
+  const rent = PROPERTIES.reduce((s,p)=>s+parseMoneyStr(p.renter.rent),0);
+  const loans = PROPERTIES.reduce((s,p)=>s+parseMoneyStr(p.loan.payment),0);
+  const bills = PROPERTIES.reduce((s,p)=>s+EXTRA[p.id].bills.reduce((a,b)=>a+Number(b[1]),0),0);
+  const costs = loans + bills, net = rent - costs;
+  const el = document.getElementById('dataCheck');
+  const shownRent = parseMoneyStr(document.getElementById('mdRent').textContent), shownCosts = parseMoneyStr(document.getElementById('mdCosts').textContent), shownNet = parseMoneyStr(document.getElementById('mdNet').textContent);
+  if(rent===shownRent && costs===shownCosts && net===shownNet){
+    el.innerHTML = '✅ <span style="color:var(--teal)">Data check passed</span> <span style="color:var(--muted);font-weight:400">— automated figures re-added from their parts and they reconcile (' + money(rent) + ' in − ' + money(costs) + ' out = ' + money(net) + ' net).</span>';
+  } else {
+    el.innerHTML = '⚠️ <span style="color:var(--red)">CONTRADICTION FLAGGED</span> <span style="color:var(--muted);font-weight:400">— displayed totals do not match their parts (recomputed: ' + money(rent) + ' in − ' + money(costs) + ' out = ' + money(net) + ' net). Flagged before display, per the accuracy protocol.</span>';
+  }
+}
+/* ================= LOCATION REPORTS — full file per location (Bori, Oct 14) ================= */
+let reportMode = false, selReports = new Set();
+function cardClick(id){ if(reportMode){ selReports.has(id) ? selReports.delete(id) : selReports.add(id); renderList(); updateBulkCount(); } else openProp(id); }
+function toggleReportMode(){
+  reportMode = !reportMode;
+  if(!reportMode) selReports.clear();
+  document.getElementById('bulkBar').classList.toggle('hidden', !reportMode);
+  document.getElementById('reportModeBtn').textContent = reportMode ? '🧾 Selecting locations for reports…' : '🧾 Create location reports — pick one or many';
+  renderList(); updateBulkCount();
+}
+function updateBulkCount(){
+  const el = document.getElementById('bulkCount'); if(!el) return;
+  el.innerHTML = selReports.size ? `<b>${selReports.size} location${selReports.size>1?'s':''} selected</b> — one complete file each, generated one at a time.` : 'Tap locations to select them. You get <b>one complete file per location</b> — every detail, note, picture, and history it has.';
+}
+function generateSelectedReports(){
+  if(!selReports.size){ document.getElementById('bulkCount').innerHTML = '⚠️ Pick at least one location first — tap its card.'; return; }
+  const ids = [...selReports];
+  ids.forEach((id,i)=> setTimeout(()=>downloadReport(id), i*800));
+}
+function ckSummaryFor(id){
+  const total = (ckItemsStore[id] || CK_DEFAULTS).length;
+  const count = mode => { const st = ckState[id+'-'+mode] || {}; return Object.values(st).filter(e=>e.checked).length; };
+  return {total: total, inDone: count('in'), outDone: count('out')};
+}
+function reportImagesFor(id){
+  const imgs = [], names = [];
+  ['in','out'].forEach(mode=>{ const st = ckState[id+'-'+mode] || {}; Object.values(st).forEach(e=> (e.atts||[]).forEach(a=>{ names.push(a.name); if(a.kind==='image' && a.url && a.url.indexOf('data:')===0) imgs.push(a); })); });
+  bgFilesFor(id).forEach(f=>{ if(!f.sample){ names.push(f.name); if(f.kind==='image' && f.url && f.url.indexOf('data:')===0) imgs.push(f); } });
+  return {imgs: imgs, names: names};
+}
+const REPORT_GRAD = {p1:'linear-gradient(135deg,#b08a58,#7d5a35)', p2:'linear-gradient(135deg,#bfa06c,#8a6f42)', p3:'linear-gradient(135deg,#a08b6d,#6f5c44)', p4:'linear-gradient(135deg,#b3815f,#7c5138)', p5:'linear-gradient(135deg,#98917f,#6b6455)'};
+const REPORT_LABELS = {figs:'Key figures strip', exec:'Executive summary', details:'Property details', keys:'Keys & access (owner only)', renter:'Renter & lease', bgcheck:'Tenant background check', loan:'Loan & equity', annual:'Annual summary (12-month)', bills:'Bills', tax:'Property tax', insurance:'Insurance', utilities:'Utilities — who pays', assets:'Assets & appliances', systems:'Systems & capital register', repairs:'Repairs & maintenance history', docs:'Documents index', photos:'Photos — proof of state', checklist:'Move-in / move-out checklist', people:'Service people', vacancy:'Vacancy & showings', notes:'Owner notes (private)'};
+const REPORT_GROUPS = [
+  ['🏠 Overview', ['figs','exec','details','keys','photos','checklist','vacancy','notes']],
+  ['💵 Money', ['loan','annual','bills','tax','insurance','utilities']],
+  ['👤 People', ['renter','bgcheck','people']],
+  ['🧰 Assets & records', ['assets','systems','repairs','docs']]
+];
+let reportOpts = {};
+try{ reportOpts = JSON.parse(localStorage.getItem('recc_report_opts')||'{}'); }catch(e){}
+function optOn(k){ return reportOpts[k] !== false; }
+function saveReportOpts(){ try{ localStorage.setItem('recc_report_opts', JSON.stringify(reportOpts)); }catch(e){} }
+function setReportOpt(k, v){ reportOpts[k] = v; saveReportOpts(); renderReportOptsPanels(); }
+function reportPreset(name){
+  const all = Object.keys(REPORT_LABELS);
+  if(name==='all') all.forEach(k=>reportOpts[k]=true);
+  if(name==='none') all.forEach(k=>reportOpts[k]=false);
+  if(name==='buyer'){ all.forEach(k=>reportOpts[k]=true); ['keys','notes','loan','bgcheck'].forEach(k=>reportOpts[k]=false); }
+  if(name==='money'){ all.forEach(k=>reportOpts[k]=false); ['figs','exec','loan','annual','bills','tax','insurance'].forEach(k=>reportOpts[k]=true); }
+  saveReportOpts(); renderReportOptsPanels();
+}
+function renderReportOptsPanels(){
+  document.querySelectorAll('.report-opts-panel').forEach(panel=>{
+    panel.innerHTML = REPORT_GROUPS.map(([g, keys])=>`<div class="rogroup">${g}</div>` + keys.filter(k=>!(k==='vacancy' && panel.dataset.where==='loc' && current && !current.vacant)).map(k=>`<label class="roitem"><input type="checkbox" ${optOn(k)?'checked':''} onchange="setReportOpt('${k}', this.checked)"> ${REPORT_LABELS[k]}</label>`).join('')).join('')
+      + `<div class="ropresets"><button class="ropreset" onclick="reportPreset('all')">Everything</button><button class="ropreset" onclick="reportPreset('buyer')">Buyer version</button><button class="ropreset" onclick="reportPreset('money')">Money only</button><button class="ropreset" onclick="reportPreset('none')">Clear all</button></div><p class="note" style="margin:6px 0 0">The cover and sign-off always print. <b>Buyer version</b> hides keys &amp; access codes, owner notes, the loan, and the background check. Your picks are remembered on this device.</p>`;
+  });
+}
+function toggleReportOpts(id){ const el = document.getElementById(id); if(!el) return; const show = el.style.display==='none'; el.style.display = show ? '' : 'none'; if(show) renderReportOptsPanels(); }
+
+function buildReportHTML(p, opts){
+  const useOpts = opts || reportOpts;
+  const on = k => useOpts[k] !== false;
+  const x = EXTRA[p.id], eq = x.valueNow - x.balanceNum;
+  const billsTotal = x.bills.reduce((s,b)=>s+Number(b[1]),0);
+  const assetsTotal = p.assets.reduce((s,a)=>s+Number(a[2]),0);
+  const ck = ckSummaryFor(p.id), att = reportImagesFor(p.id);
+  const bg = bgFilesFor(p.id);
+  const shows = showingsStore[p.id] || [];
+  const notes = notesStore[p.id] || '';
+  const rows = pairs => pairs.map(([l,v])=>`<tr><td class="l">${l}</td><td class="v">${v}</td></tr>`).join('');
+  const table = pairs => `<table>${rows(pairs)}</table>`;
+  const assetsRows = p.assets.map(a=>`<tr><td class="l">${escHtml(a[0])} · ${escHtml(a[1])}</td><td class="v">${money(a[2])}</td></tr>`).join('') + `<tr><td class="l"><b>Total asset value</b></td><td class="v"><b>${money(assetsTotal)}</b></td></tr>`;
+  const repairRows = x.repairs.length ? x.repairs.map(r=>`<tr><td class="l">${escHtml(r[0])}<br><small>${escHtml(r[1])} · ${escHtml(r[3])}</small></td><td class="v">${money(r[2])}</td></tr>`).join('') : '<tr><td class="l">No repairs logged</td><td class="v">—</td></tr>';
+  const billRows = x.bills.map(b=>`<tr><td class="l">${escHtml(b[0])}<br><small>Due: ${escHtml(b[2])}</small></td><td class="v">${b[1]? money(b[1])+' / mo':'—'}</td></tr>`).join('') + `<tr><td class="l"><b>Total monthly bills</b></td><td class="v"><b>${money(billsTotal)} / mo</b></td></tr>`;
+  const docRows = docsFor(p).map(d=>`<tr><td class="l">📄 ${escHtml(d[0])}<br><small>${escHtml(d[2])}</small></td><td class="v">${escHtml(d[1])}</td></tr>`).join('');
+  const peopleRows = p.people.map(pp=>`<tr><td class="l">${pp[0]} ${escHtml(pp[2])}<br><small>${escHtml(pp[1])}</small></td><td class="v">${escHtml(pp[3])}</td></tr>`).join('');
+  const photoTiles = p.photos.map((n,i)=>`<div class="tile" style="background:${REPORT_GRAD[p.cls]};filter:brightness(${1 + i*0.06})">📷 ${escHtml(n)}<br><small>Before move-in</small></div>`).join('');
+  const upImgs = att.imgs.map(a=>`<figure><img src="${a.url}"><figcaption>${escHtml(a.name)}</figcaption></figure>`).join('');
+  const bgRows = p.vacant
+    ? [['Required','Set by the administrator (sample)'],['Performed','— no tenant yet'],['Reports on file', bg.length ? bg.map(f=>escHtml(f.name)).join('<br>') : 'None yet']]
+    : [['Tenant',p.renter.name],['Required','Yes (sample)'],['Performed','Yes — Aug 12, 2026 (sample)'],['Result','Passed screening (sample)'],['Screening provider','Sample Screening Co. (sample)'],['Consent on file','Yes (sample)'],['Reports on file', bg.map(f=>escHtml(f.name)).join('<br>') || 'None']];
+  const rentNum = parseMoneyStr(p.renter.rent), loanNum = parseMoneyStr(p.loan.payment);
+  const monthlyNet = rentNum - loanNum - billsTotal;
+  const noi = x.tax[0] - x.tax[1], loanAnnual = loanNum * 12, cfAfter = noi - loanAnnual;
+  const capRate = (!p.vacant && x.valueNow && noi > 0) ? (noi / x.valueNow * 100).toFixed(1) + '%' : '—';
+  const eqPct = x.valueNow ? Math.round(eq / x.valueNow * 100) : 0;
+  const taxStatus = x.taxbill[4].replace(' (sample)','');
+  const taxDue = x.taxbill[3].replace(' (sample)','').replace(/^Due /,'');
+  const sysRows = x.systems.map(s=>`<tr><td class="l">${escHtml(s[0])}<br><small>${escHtml(s[1])} · ${escHtml(s[2])}</small></td><td class="v">${escHtml(s[3])}<br><small>${escHtml(s[4])}</small></td></tr>`).join('');
+  const execSummary = p.vacant
+    ? `Currently UNOCCUPIED and on the market at ${escHtml(p.asking)} — 24 days vacant (sample), ${shows.length} showings logged. Carrying cost is ${money(billsTotal)} / mo in bills while it sits empty. Equity is ${money(eq)} (${eqPct}% of estimated value), with ${money(assetsTotal)} of assets on site. Property tax ${money(x.taxbill[2])} / yr — ${escHtml(taxStatus)}; next due ${escHtml(taxDue)} (sample).`
+    : `Occupied by ${escHtml(p.renter.name)} under a lease running ${escHtml(p.renter.lease.replace(' (sample)',''))}. Rent is ${escHtml(p.renter.rent)}; after the loan payment (${escHtml(p.loan.payment)}) and this location's monthly bills (${money(billsTotal)}), the monthly picture is ${(monthlyNet < 0 ? '−$' : '+$') + Math.abs(monthlyNet).toLocaleString('en-US')} / mo. Equity is ${money(eq)} (${eqPct}% of the ${money(x.valueNow)} estimated value), assets on site total ${money(assetsTotal)}, and the tenant background check is on file — passed (sample). Property tax ${money(x.taxbill[2])} / yr — ${escHtml(taxStatus)}; next due ${escHtml(taxDue)} (sample).`;
+  const genDate = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const S = [];
+  if(on('details')) S.push(['Property Details', table([['Address',p.addr],['City',p.city],['Type',p.type],['Bedrooms',p.beds],['Bathrooms',p.baths],['Square feet',p.sqft],['Year built',p.year],['Lot',p.lot],['Status', p.vacant?'VACANT — no tenant':'Occupied — tenant in place']])]);
+  if(on('keys')) S.push(['Keys & Access (owner only)', table(x.keys)]);
+  if(on('renter')) S.push(['Renter & Lease', p.vacant ? table([['Status','No tenant — this location is vacant'],['Asking rent',p.asking],['Next step','List it / schedule tours (sample)']]) : table([['Tenant',p.renter.name],['Phone',p.renter.phone],['Email',p.renter.email],['Occupants',p.renter.occupants],['Lease term',p.renter.lease],['Monthly rent',p.renter.rent],['Security deposit held','$2,400 (sample)'],['October 2026 rent', rentPaid[p.id]?'PAID ✓':'DUE'],['Recent history','Jul 2026 — paid on time · Aug 2026 — paid late · Sep 2026 — paid on time (sample)']])]);
+  if(on('bgcheck')) S.push(['Tenant Background Check', table(bgRows)]);
+  if(on('loan')) S.push(['Loan & Equity', table([['Lender',p.loan.lender],['Loan type',p.loan.type],['Balance',p.loan.balance],['Rate',p.loan.rate],['Monthly payment',p.loan.payment],['Started',p.loan.started],['Bought for',money(x.purchase)],['Worth now (estimate)',money(x.valueNow)],['Equity',money(eq)]])]);
+  if(on('annual')) S.push(['Annual Summary — trailing 12 months (from year-end records)', table([['Gross rent income (sample)',money(x.tax[0])],['Documented operating expenses (sample)',money(x.tax[1])],['Net operating income (sample)',money(noi)],['Cap rate on estimated value',capRate],['Loan payments — 12 months',money(loanAnnual)],['Cash flow after loan (sample)',(cfAfter < 0 ? '−$' : '+$') + Math.abs(cfAfter).toLocaleString('en-US')],['Security deposit held', p.vacant ? '—' : '$2,400 (sample)'],['Owner reserve held','$500 (sample)']]) + `<p class="vnote">Variance note: the app's monthly snapshot counts rent − loan − monthly bills (${(monthlyNet < 0 ? '−$' : '+$') + Math.abs(monthlyNet).toLocaleString('en-US')} / mo for this location). The annual view adds property tax, insurance, and repairs from the year-end records — which is why the trailing-12-month cash flow after loan payments differs. Both views are labeled with what they include (Accuracy Protocol).</p>`]);
+  if(on('bills')) S.push(['Bills — this location', `<table>${billRows}</table>`]);
+  if(on('tax')) S.push(['Property Tax', table([['County',x.taxbill[0]],['Parcel',x.taxbill[1]],['Annual tax',money(x.taxbill[2])+' / yr'],['Next due',x.taxbill[3]],['Status',x.taxbill[4]]])]);
+  if(on('insurance')) S.push(['Insurance', table(x.insurance)]);
+  if(on('utilities')) S.push(['Utilities — who pays', table(x.utilities)]);
+  if(on('assets')) S.push(['Assets — appliances & value', `<table>${assetsRows}</table>`]);
+  if(on('systems')) S.push(['Systems & Capital Register — age & remaining life', `<table>${sysRows}</table>`]);
+  if(on('repairs')) S.push(['Repairs & Maintenance History', `<table>${repairRows}</table>`]);
+  if(on('docs')) S.push(['Documents Index — everything on file', `<table>${docRows}</table><p class="vnote">Visible gap: ${escHtml(x.docsGap)}. Gaps are shown on purpose — a missing document is easier to fix when the file admits it.</p>`]);
+  if(on('photos')) S.push(['Photos — proof of state (before move-in)', `<div class="tiles">${photoTiles}</div>` + (upImgs ? `<h2 style="margin-top:18px">Uploaded Photos (from checklist / background check)</h2>${upImgs}` : '') + (att.names.length ? `<p class="vnote">Attachments on file: ${att.names.map(escHtml).join(' · ')}</p>` : '')]);
+  if(on('checklist')) S.push(['Move-In / Move-Out Checklist', table([['Move-In walkthrough', ck.inDone + ' of ' + ck.total + ' checked (' + (ck.total?Math.round(ck.inDone/ck.total*100):0) + '%)'],['Move-Out walkthrough', ck.outDone + ' of ' + ck.total + ' checked (' + (ck.total?Math.round(ck.outDone/ck.total*100):0) + '%)'],['Attachments on items', att.names.length ? att.names.map(escHtml).join('<br>') : 'None']])]);
+  if(on('people')) S.push(['Service People', `<table>${peopleRows}</table>`]);
+  if(p.vacant && on('vacancy')) S.push(['Vacancy', table([['On the market since','Sep 20, 2026 (sample)'],['Days vacant','24 days (sample)'],['Rent not collected so far','≈ $1,760 (sample estimate)'],['Showings', shows.length ? shows.map(s=>escHtml(s[0])+' — '+escHtml(s[1])).join('<br>') : 'None logged']])]);
+  if(on('notes')) S.push(['Owner Notes (private)', `<div class="notebox">${notes ? escHtml(notes) : 'No owner notes for this location.'}</div>`]);
+  const sectionsHTML = S.map((s,i)=>`  <h2>${i+1} · ${s[0]}</h2>${s[1]}`).join('\n');
+  const picked = Object.keys(REPORT_LABELS).filter(k=>on(k) && (k!=='vacancy' || p.vacant)).map(k=>REPORT_LABELS[k]);
+  const ownerBits = [on('keys') ? 'access codes' : null, on('loan') ? 'loan detail' : null].filter(Boolean).join(' and ');
+  const privacyLine = ownerBits ? `This file includes owner-only information (${ownerBits}) — share it accordingly.` : 'This file was generated without the owner-only sections (access codes, loan detail).';
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Location Report — ${escHtml(p.addr)}</title><style>
+  *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#2b2620;background:#f5f0e8}
+  .page{max-width:840px;margin:0 auto;padding:42px 40px 52px;background:#fff;box-shadow:0 4px 34px rgba(96,76,44,.10)}
+  .brandrow{display:flex;gap:11px;align-items:center}
+  .brandsub{font-size:10px;letter-spacing:2.4px;color:#b08d57;margin-top:3px;font-weight:700}
+  img{max-width:100%}
+  td{overflow-wrap:anywhere}
+  .cover{border:1px solid #e0d3b8;border-top:3px solid #b08d57;border-radius:6px;padding:30px 30px 26px;background:linear-gradient(180deg,#fdfaf4,#f8f2e6)}
+  .cover .brand{font-size:11px;letter-spacing:2.6px;font-weight:700;color:#a07d46}
+  .cover .rule{height:1px;background:#d9c391;margin:14px 0}
+  .cover .addr{font-family:Georgia,"Times New Roman",serif;font-size:33px;font-weight:600;line-height:1.18;letter-spacing:.2px;color:#241f18}
+  .cover .meta{color:#7d7261;font-size:14px;margin-top:7px;letter-spacing:.2px}
+  .status{display:inline-block;margin-top:16px;background:#f3e9d2;border:1px solid #d3ba85;color:#7c5a26;padding:6px 13px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:1.1px}
+  .status.vac{background:#f2e2d5;border-color:#d8b096;color:#8a4a30}
+  .figs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 4px}
+  .fig{background:#faf6ee;border:1px solid #e7dcc4;border-radius:8px;padding:13px 14px}
+  .fig small{display:block;color:#a07d46;font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+  .fig b{display:block;margin-top:3px;font-family:Georgia,"Times New Roman",serif;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;color:#241f18}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;color:#8a6d3b;margin:30px 0 4px;padding-bottom:6px;border-bottom:1px solid #e7dcc4;font-weight:700}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td{padding:8px 4px;border-bottom:1px solid #f0e8d8;vertical-align:top}
+  td.l{color:#57503f;width:46%} td.v{text-align:right;font-weight:600;color:#2b2620}
+  td small{color:#998c74;font-weight:400}
+  .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  .tile{border-radius:8px;color:#fff;padding:10px;font-size:12px;font-weight:700;min-height:64px;display:flex;flex-direction:column;justify-content:flex-end;text-shadow:0 1px 5px rgba(43,32,16,.5)}
+  .tile small{font-weight:500;opacity:.88}
+  figure{margin:0 0 10px} figure img{width:100%;border-radius:8px;border:1px solid #e7dcc4}
+  figcaption{font-size:12px;color:#8b8172;margin-top:4px}
+  .notebox{background:#faf6ee;border:1px solid #e7dcc4;border-radius:8px;padding:14px 15px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+  .vnote{font-size:12.5px;color:#8b8172;margin-top:7px;line-height:1.55}
+  footer{margin-top:36px;border-top:1px solid #e7dcc4;padding-top:12px;color:#9a8f7d;font-size:12px;line-height:1.65}
+  @media screen and (max-width:640px){
+    .page{padding:24px 16px 38px}
+    .cover{padding:22px 18px 20px}
+    .cover .addr{font-size:26px}
+    .figs{grid-template-columns:1fr 1fr}
+    .fig b{font-size:18px}
+    .tiles{grid-template-columns:1fr 1fr}
+    td.l{width:42%}
+    h2{margin-top:24px}
+  }
+  @media print{ body{background:#fff} .page{padding:10px 6px;box-shadow:none} }
+  </style></head><body><div class="page">
+  <div class="cover"><div class="brandrow"><svg width="30" height="30" viewBox="0 0 100 100" style="flex:none" aria-label="The Helm logo"><defs><radialGradient id="hg2" cx="0.38" cy="0.34" r="0.9"><stop offset="0" stop-color="#fff6c4"/><stop offset="0.45" stop-color="#e9c860"/><stop offset="0.8" stop-color="#b98c2e"/><stop offset="1" stop-color="#7a5a18"/></radialGradient></defs><g transform="translate(1.5 2.5)" opacity="0.16"><g stroke="#000" stroke-width="5.2" stroke-linecap="round" fill="none"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g></g><g stroke-linecap="round" fill="none"><g stroke="#14100a" stroke-width="5.2"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g><g stroke="#d9b45c" stroke-width="3.1"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g><g stroke="#2e2106" stroke-width="0.7" opacity="0.5"><circle cx="50" cy="50" r="25"/><line x1="50" y1="14" x2="50" y2="86"/><line x1="14" y1="50" x2="86" y2="50"/><line x1="24.5" y1="24.5" x2="75.5" y2="75.5"/><line x1="75.5" y1="24.5" x2="24.5" y2="75.5"/></g></g><circle cx="50" cy="12" r="4.5" fill="#14100a"/><circle cx="50" cy="88" r="4.5" fill="#14100a"/><circle cx="12" cy="50" r="4.5" fill="#14100a"/><circle cx="88" cy="50" r="4.5" fill="#14100a"/><circle cx="23" cy="23" r="4.5" fill="#14100a"/><circle cx="77" cy="77" r="4.5" fill="#14100a"/><circle cx="77" cy="23" r="4.5" fill="#14100a"/><circle cx="23" cy="77" r="4.5" fill="#14100a"/><circle cx="50" cy="12" r="3.4" fill="url(#hg2)"/><circle cx="50" cy="88" r="3.4" fill="url(#hg2)"/><circle cx="12" cy="50" r="3.4" fill="url(#hg2)"/><circle cx="88" cy="50" r="3.4" fill="url(#hg2)"/><circle cx="23" cy="23" r="3.4" fill="url(#hg2)"/><circle cx="77" cy="77" r="3.4" fill="url(#hg2)"/><circle cx="77" cy="23" r="3.4" fill="url(#hg2)"/><circle cx="23" cy="77" r="3.4" fill="url(#hg2)"/><circle cx="50" cy="50" r="11" fill="#14100a"/><circle cx="50" cy="50" r="9.4" fill="url(#hg2)"/><circle cx="50" cy="47.4" r="2.6" fill="#14100a"/><path d="M50 49.2 L52.3 54.8 L47.7 54.8 Z" fill="#14100a"/></svg><div><div class="brand">THE HELM · ESTATE COMMAND</div><div class="brandsub">LOCATION REPORT — FULL FILE</div></div></div><div class="rule"></div>
+  <div class="addr">${escHtml(p.addr)}</div><div class="meta">${escHtml(p.city)} · ${escHtml(p.type)} · ${p.beds} bed · ${p.baths} bath · ${escHtml(p.sqft)} sq ft · Built ${p.year}</div>
+  <span class="status${p.vacant ? ' vac' : ''}">${p.vacant ? 'UNOCCUPIED — NO TENANT' : 'OCCUPIED — ' + escHtml(p.renter.name.toUpperCase())}</span></div>
+  ${on('figs') ? `<div class="figs">
+    <div class="fig"><small>${p.vacant?'Asking rent':'Rent'}</small><b>${p.vacant? escHtml(p.asking) : escHtml(p.renter.rent.replace(' (sample)',''))}</b></div>
+    <div class="fig"><small>Estimated value</small><b>${money(x.valueNow)}</b></div>
+    <div class="fig"><small>Equity</small><b>${money(eq)}</b></div>
+    <div class="fig"><small>Assets value</small><b>${money(assetsTotal)}</b></div>
+  </div>` : ''}
+  ${on('exec') ? `<h2>Executive Summary</h2><div class="notebox">${execSummary}</div>` : ''}
+${sectionsHTML}
+  <footer>Generated by The Helm · Estate Command · ${genDate} · Custom report — sections included (${picked.length}): ${picked.join(' · ')}.<br>Figures are drawn from this location's records in the app; automated figures are double-checked against their parts before display (Accuracy Protocol).<br>${privacyLine}<br><b>SAMPLE DATA</b> — this template build contains demonstration information only.</footer>
+  </div></body></html>`;
+}
+
+function reportFileName(p){ return 'Location-Report-' + p.addr.replace(/[^a-z0-9]+/gi,'-') + '.html'; }
+function downloadReport(id){
+  const p = PROPERTIES.find(x=>x.id===id); if(!p) return;
+  const blob = new Blob([buildReportHTML(p)], {type:'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = reportFileName(p);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+function printReport(){
+  if(!current) return;
+  const w = window.open('', '_blank');
+  if(!w){ downloadReport(current.id); return; }
+  w.document.write(buildReportHTML(current)); w.document.close(); w.focus();
+  setTimeout(()=>{ try { w.print(); } catch(e){} }, 600);
+}
+function emailReport(){
+  if(!current) return;
+  const p = current, x = extra();
+  const subject = 'Full Location Report — ' + p.addr;
+  const body = [
+    'Full location report for ' + p.addr + ' (' + p.city + ')',
+    'Status: ' + (p.vacant ? 'UNOCCUPIED — ' + p.asking : 'Occupied — tenant ' + p.renter.name + ', rent ' + p.renter.rent),
+    'Estimated value: ' + money(x.valueNow) + ' · Equity: ' + money(x.valueNow - x.balanceNum) + ' · Loan balance: ' + money(x.balanceNum),
+    '',
+    'Sections included in this report (' + Object.keys(REPORT_LABELS).filter(k=>optOn(k)).length + '): ' + Object.keys(REPORT_LABELS).filter(k=>optOn(k)).map(k=>REPORT_LABELS[k]).join(' · ') + '.',
+    'The complete report file is generated in the app with exactly those sections — attach the downloaded/printed file to this email.',
+    '',
+    '— The Helm · Estate Command (sample data in this template)'
+  ].join('\n');
+  location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+/* ================= INIT ================= */
+renderList(); renderAttention(); renderCal(); renderTax(); renderPrefs(); applyPrefs(); runDataCheck();
+</script>
+</body>
+</html>
